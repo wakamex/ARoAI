@@ -386,7 +386,7 @@ ec_requirements_value_11 = {
 
 ec_government_costs_share = 0.325
 
-ec_government_costs_limit = {
+ec_government_costs_target = {
 	value = income
 	multiply = {
 		value = ec_government_costs_share
@@ -423,12 +423,12 @@ ec_government_costs_limit = {
 }
 
 ec_government_costs_ceiling = {
-	value = ec_government_costs_limit
+	value = ec_government_costs_target
 	multiply = 1.4
 }
 
 ec_government_costs_excess = {
-	value = ec_government_costs_limit
+	value = ec_government_costs_target
 	multiply = 1.2
 }
 
@@ -544,7 +544,7 @@ ec_bureaucracy_ceiling = {
 
 ### CONSTRUCTION TARGETS
 
-ec_construction_costs_limit = {
+ec_construction_costs_target = {
 	value = income
 	multiply = {
 		value = 1.05
@@ -591,7 +591,7 @@ ec_construction_costs_limit = {
 }
 
 ec_construction_costs_excess = {
-	value = ec_construction_costs_limit
+	value = ec_construction_costs_target
 	multiply = 1.2
 }
 
@@ -792,56 +792,60 @@ ec_innovation_current = {
 ### UNIVERSITY TARGETS
 
 ec_university_1 = {
-	value = ec_university_11
+	value = ec_university_target
 	divide = 2.50
 }
 
 ec_university_2 = {
-	value = ec_university_11
+	value = ec_university_target
 	divide = 2.35
 }
 
 ec_university_3 = {
-	value = ec_university_11
+	value = ec_university_target
 	divide = 2.20
 }
 
 ec_university_4 = {
-	value = ec_university_11
+	value = ec_university_target
 	divide = 2.05
 }
 
 ec_university_5 = {
-	value = ec_university_11
+	value = ec_university_target
 	divide = 1.90
 }
 
 ec_university_6 = {
-	value = ec_university_11
+	value = ec_university_target
 	divide = 1.75
 }
 
 ec_university_7 = {
-	value = ec_university_11
+	value = ec_university_target
 	divide = 1.60
 }
 
 ec_university_8 = {
-	value = ec_university_11
+	value = ec_university_target
 	divide = 1.45
 }
 
 ec_university_9 = {
-	value = ec_university_11
+	value = ec_university_target
 	divide = 1.30
 }
 
 ec_university_10 = {
-	value = ec_university_11
+	value = ec_university_target
 	divide = 1.15
 }
 
 ec_university_11 = {
+	value = ec_university_target
+}
+
+ec_university_target = {
 	value = var:ec_incorporated_population
 	divide = 600000
 	multiply = {
@@ -853,10 +857,10 @@ ec_university_11 = {
 }
 
 ec_university_excess = {
-	value = ec_university_11
+	value = ec_university_target
 	multiply = 1.2
 	min = {
-		value = ec_university_11
+		value = ec_university_target
 		add = 1
 	}
 }
@@ -904,6 +908,13 @@ ec_infrastructure_6 = {
 	max = 1000000
 }
 
+ec_infrastructure_7 = {
+	value = infrastructure_usage
+	add = 20
+	min = 20
+	max = 1000000
+}
+
 ec_infrastructure_excess = {
 	value = infrastructure_usage
 	add = 50
@@ -913,44 +924,39 @@ ec_infrastructure_excess = {
 
 ### CONVOY TARGETS
 
-ec_convoys_3 = {
-	value = ec_convoys_target
-	divide = 2.5000
-}
-
 ec_convoys_4 = {
 	value = ec_convoys_target
-	divide = 2.3125
+	divide = 2.500
 }
 
 ec_convoys_5 = {
 	value = ec_convoys_target
-	divide = 2.1250
+	divide = 2.285
 }
 
 ec_convoys_6 = {
 	value = ec_convoys_target
-	divide = 1.9375
+	divide = 2.070
 }
 
 ec_convoys_7 = {
 	value = ec_convoys_target
-	divide = 1.7500
+	divide = 1.855
 }
 
 ec_convoys_8 = {
 	value = ec_convoys_target
-	divide = 1.5625
+	divide = 1.640
 }
 
 ec_convoys_9 = {
 	value = ec_convoys_target
-	divide = 1.3750
+	divide = 1.425
 }
 
 ec_convoys_10 = {
 	value = ec_convoys_target
-	divide = 1.1875
+	divide = 1.210
 }
 
 ec_convoys_11 = {
@@ -970,9 +976,16 @@ ec_convoys_target = {
 		multiply = 200
 	}
 	multiply = {
-		value = var:ec_square_root_of_incorporated_gdp_per_capita
-		min = 0.5
-		max = 2.0
+		value = var:ec_square_root_of_minus_half_unincorporated_gdp_per_capita
+		min = 0.50
+		max = 2.00
+		add = {
+			value = var:ec_square_root_of_minus_half_unincorporated_gdp_per_capita
+			subtract = 2.00
+			divide = 2.00
+			min = 0
+			max = 1.00
+		}
 	}
 }
 
@@ -1006,7 +1019,7 @@ ec_convoys_current = {
 
 ec_military_costs_share = 0.225
 
-ec_military_costs_limit = {
+ec_military_costs_target = {
 	value = income
 	multiply = {
 		value = ec_military_costs_share
@@ -1043,7 +1056,7 @@ ec_military_costs_limit = {
 }
 
 ec_military_costs_excess = {
-	value = ec_military_costs_limit
+	value = ec_military_costs_target
 	multiply = 1.20
 	if = {
 		limit = {
@@ -1091,10 +1104,33 @@ ec_military_costs_excess = {
 			}
 		}
 	}
+	else_if = {
+		limit = {
+			exists = c:PRU
+			this = c:PRU
+			year < 1870
+		}
+		if = {
+			limit = {
+				year < 1850
+			}
+			multiply = 1.5
+		}
+		else = {
+			multiply = {
+				value = 1.0
+				add = {
+					value = 1870
+					subtract = year
+					multiply = 0.025
+				}
+			}
+		}
+	}
 }
 
 ec_military_costs_ceiling = {
-	value = ec_military_costs_limit
+	value = ec_military_costs_target
 	multiply = 1.40
 	if = {
 		limit = {
@@ -1123,6 +1159,29 @@ ec_military_costs_ceiling = {
 		limit = {
 			exists = c:TUR
 			this = c:TUR
+			year < 1870
+		}
+		if = {
+			limit = {
+				year < 1850
+			}
+			multiply = 1.5
+		}
+		else = {
+			multiply = {
+				value = 1.0
+				add = {
+					value = 1870
+					subtract = year
+					multiply = 0.025
+				}
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			exists = c:PRU
+			this = c:PRU
 			year < 1870
 		}
 		if = {
@@ -1162,68 +1221,79 @@ ec_military_costs_value = {
 }
 
 ec_battalions_1 = {
-	value = ec_battalions_11
+	value = ec_battalions_target
 	divide = 1.70
 }
 
 ec_battalions_2 = {
-	value = ec_battalions_11
+	value = ec_battalions_target
 	divide = 1.63
 }
 
 ec_battalions_3 = {
-	value = ec_battalions_11
+	value = ec_battalions_target
 	divide = 1.56
 }
 
 ec_battalions_4 = {
-	value = ec_battalions_11
+	value = ec_battalions_target
 	divide = 1.49
 }
 
 ec_battalions_5 = {
-	value = ec_battalions_11
+	value = ec_battalions_target
 	divide = 1.42
 }
 
 ec_battalions_6 = {
-	value = ec_battalions_11
+	value = ec_battalions_target
 	divide = 1.35
 }
 
 ec_battalions_7 = {
-	value = ec_battalions_11
+	value = ec_battalions_target
 	divide = 1.28
 }
 
 ec_battalions_8 = {
-	value = ec_battalions_11
+	value = ec_battalions_target
 	divide = 1.21
 }
 
 ec_battalions_9 = {
-	value = ec_battalions_11
+	value = ec_battalions_target
 	divide = 1.14
 }
 
 ec_battalions_10 = {
-	value = ec_battalions_11
+	value = ec_battalions_target
 	divide = 1.07
 }
 
 ec_battalions_11 = {
+	value = ec_battalions_target
+}
+
+ec_battalions_target = {
 	value = var:ec_incorporated_population
 	divide = 1000000
-	multiply = 5.0
+	multiply = 7.00
 	multiply = {
-		value = ec_incorporated_gdp_per_capita
-		min = 0.5
-		max = 2.0
+		value = var:ec_square_root_of_incorporated_gdp_per_capita
+		min = 0.75
+		max = 1.50
+		add = {
+			value = var:ec_square_root_of_incorporated_gdp_per_capita
+			subtract = 1.50
+			divide = 2.00
+			min = 0
+			max = 0.75
+		}
 	}
 }
 
 ec_battalions_excess = {
-	value = ec_battalions_11
+	value = ec_battalions_target
 	multiply = 1.20
 	if = {
 		limit = {
@@ -1271,14 +1341,37 @@ ec_battalions_excess = {
 			}
 		}
 	}
+	else_if = {
+		limit = {
+			exists = c:PRU
+			this = c:PRU
+			year < 1870
+		}
+		if = {
+			limit = {
+				year < 1850
+			}
+			multiply = 1.5
+		}
+		else = {
+			multiply = {
+				value = 1.0
+				add = {
+					value = 1870
+					subtract = year
+					multiply = 0.025
+				}
+			}
+		}
+	}
 	min = {
-		value = ec_battalions_11
+		value = ec_battalions_target
 		add = 1
 	}
 }
 
 ec_battalions_ceiling = {
-	value = ec_battalions_11
+	value = ec_battalions_target
 	multiply = 1.40
 	if = {
 		limit = {
@@ -1326,70 +1419,97 @@ ec_battalions_ceiling = {
 			}
 		}
 	}
+	else_if = {
+		limit = {
+			exists = c:PRU
+			this = c:PRU
+			year < 1870
+		}
+		if = {
+			limit = {
+				year < 1850
+			}
+			multiply = 1.5
+		}
+		else = {
+			multiply = {
+				value = 1.0
+				add = {
+					value = 1870
+					subtract = year
+					multiply = 0.025
+				}
+			}
+		}
+	}
 	min = {
-		value = ec_battalions_11
+		value = ec_battalions_target
 		add = 1
 	}
 }
 
 ec_battalions_threshold = {
-	value = ec_battalions_11
-	multiply = 0.33
+	value = ec_battalions_target
+	multiply = 0.25
 }
 
 ### FLOTILLA TARGETS
 
 ec_flotillas_1 = {
-	value = ec_flotillas_11
+	value = ec_flotillas_target
 	divide = 2.00
 }
 
 ec_flotillas_2 = {
-	value = ec_flotillas_11
+	value = ec_flotillas_target
 	divide = 1.90
 }
 
 ec_flotillas_3 = {
-	value = ec_flotillas_11
+	value = ec_flotillas_target
 	divide = 1.80
 }
 
 ec_flotillas_4 = {
-	value = ec_flotillas_11
+	value = ec_flotillas_target
 	divide = 1.70
 }
 
 ec_flotillas_5 = {
-	value = ec_flotillas_11
+	value = ec_flotillas_target
 	divide = 1.60
 }
 
 ec_flotillas_6 = {
-	value = ec_flotillas_11
+	value = ec_flotillas_target
 	divide = 1.50
 }
 
 ec_flotillas_7 = {
-	value = ec_flotillas_11
+	value = ec_flotillas_target
 	divide = 1.40
 }
 
 ec_flotillas_8 = {
-	value = ec_flotillas_11
+	value = ec_flotillas_target
 	divide = 1.30
 }
 
 ec_flotillas_9 = {
-	value = ec_flotillas_11
+	value = ec_flotillas_target
 	divide = 1.20
 }
 
 ec_flotillas_10 = {
-	value = ec_flotillas_11
+	value = ec_flotillas_target
 	divide = 1.10
 }
 
 ec_flotillas_11 = {
+	value = ec_flotillas_target
+}
+
+ec_flotillas_target = {
 	value = var:ec_coastal_incorporated_population
 	add = {
 		value = var:ec_incorporated_population
@@ -1397,16 +1517,23 @@ ec_flotillas_11 = {
 		multiply = 0.25
 	}
 	divide = 1000000
-	multiply = 2.00
+	multiply = 2.50
 	multiply = {
-		value = ec_incorporated_gdp_per_capita
-		min = 0.5
-		max = 2.0
+		value = var:ec_square_root_of_incorporated_gdp_per_capita
+		min = 0.75
+		max = 1.50
+		add = {
+			value = var:ec_square_root_of_incorporated_gdp_per_capita
+			subtract = 1.50
+			divide = 2.00
+			min = 0
+			max = 0.75
+		}
 	}
 }
 
 ec_flotillas_excess = {
-	value = ec_flotillas_11
+	value = ec_flotillas_target
 	multiply = 1.20
 	if = {
 		limit = {
@@ -1455,13 +1582,13 @@ ec_flotillas_excess = {
 		}
 	}
 	min = {
-		value = ec_flotillas_11
+		value = ec_flotillas_target
 		add = 10
 	}
 }
 
 ec_flotillas_ceiling = {
-	value = ec_flotillas_11
+	value = ec_flotillas_target
 	multiply = 1.40
 	if = {
 		limit = {
@@ -1510,14 +1637,14 @@ ec_flotillas_ceiling = {
 		}
 	}
 	min = {
-		value = ec_flotillas_11
+		value = ec_flotillas_target
 		add = 10
 	}
 }
 
 ec_flotillas_threshold = {
-	value = ec_flotillas_11
-	multiply = 0.33
+	value = ec_flotillas_target
+	multiply = 0.25
 }
 
 ### LIMITS PER ONE TYPE OF BUILDING

@@ -15,9 +15,18 @@ ec_check_identifying_object_list = {
 ec_check_arable_resources = {
 	if = {
 		limit = {
-			NOT = {
-				has_global_variable = ec_checked_arable_resources
+			OR = {
+				NOT = {
+					has_global_variable = ec_checked_arable_resources
+				}
+				has_global_variable_list = bg_wheat_farms
 			}
+		}
+		if = {
+			limit = {
+				has_global_variable_list = bg_wheat_farms
+			}
+			clear_global_variable_list = bg_wheat_farms clear_global_variable_list = bg_rye_farms clear_global_variable_list = bg_rice_farms clear_global_variable_list = bg_maize_farms clear_global_variable_list = bg_millet_farms clear_global_variable_list = bg_livestock_ranches clear_global_variable_list = bg_cotton_plantations clear_global_variable_list = bg_dye_plantations clear_global_variable_list = bg_silk_plantations clear_global_variable_list = bg_banana_plantations clear_global_variable_list = bg_sugar_plantations clear_global_variable_list = bg_tea_plantations clear_global_variable_list = bg_coffee_plantations clear_global_variable_list = bg_tobacco_plantations clear_global_variable_list = bg_opium_plantations 
 		}
 		set_global_variable = {
 			name = ec_checked_arable_resources
@@ -718,6 +727,53 @@ ec_preliminary_calculations = {
 	remove_variable = ec_incorporation_bureaucracy_cost
 }
 
+### UPDATE COASTLINE OF MARKET CAPITAL
+
+ec_update_coastline_of_market_capital = {
+	while = {
+		limit = {
+			any_in_list = {
+				variable = ec_coastline_of_market_capital
+				any_neighbouring_state = {
+					owner = root
+					is_coastal = yes
+					NOT = {
+						root = {
+							is_target_in_variable_list = {
+								name = ec_coastline_of_market_capital
+								target = prev
+							}
+						}
+					}
+				}
+			}
+		}
+		every_in_list = {
+			variable = ec_coastline_of_market_capital
+			every_neighbouring_state = {
+				limit = {
+					owner = root
+					is_coastal = yes
+					NOT = {
+						root = {
+							is_target_in_variable_list = {
+								name = ec_coastline_of_market_capital
+								target = prev
+							}
+						}
+					}
+				}
+				root = {
+					add_to_variable_list = {
+						name = ec_coastline_of_market_capital
+						target = prev
+					}
+				}
+			}
+		}
+	}
+}
+
 ### COLLECTING ALL THE STATE LEVEL DATA REQUIRED FOR THE SCRIPT
 
 ec_collect_state_level_data = {
@@ -766,6 +822,76 @@ ec_collect_state_level_data = {
 		ec_check_excess_production_on_country_level = yes
 	}
 	
+	# Prepare closest coastline states of market capital
+	
+	if = {
+		limit = {
+			root.market.owner = root
+		}
+		root.market_capital = {
+			if = {
+				limit = {
+					is_coastal = yes
+				}
+				root = {
+					add_to_variable_list = {
+						name = ec_coastline_of_market_capital
+						target = prev
+					}
+				}
+			}
+			every_neighbouring_state = {
+				limit = {
+					owner = root
+				}
+				if = {
+					limit = {
+						is_coastal = yes
+						NOT = {
+							root = {
+								is_target_in_variable_list = {
+									name = ec_coastline_of_market_capital
+									target = prev
+								}
+							}
+						}
+					}
+					root = {
+						add_to_variable_list = {
+							name = ec_coastline_of_market_capital
+							target = prev
+						}
+					}
+				}
+				every_neighbouring_state = {
+					limit = {
+						owner = root
+					}
+					if = {
+						limit = {
+							is_coastal = yes
+							NOT = {
+								root = {
+									is_target_in_variable_list = {
+										name = ec_coastline_of_market_capital
+										target = prev
+									}
+								}
+							}
+						}
+						root = {
+							add_to_variable_list = {
+								name = ec_coastline_of_market_capital
+								target = prev
+							}
+						}
+					}
+				}
+			}
+			ec_update_coastline_of_market_capital = yes
+		}
+	}
+	
 	# Cycle through every state
 	
 	every_scope_state = {
@@ -774,11 +900,43 @@ ec_collect_state_level_data = {
 		
 		if = {
 			limit = {
-				root.market.owner = root
-				OR = {
-					this = root.market_capital
-					AND = {
-						save_temporary_scope_as = ec_state_1
+				is_coastal = yes
+				NOT = {
+					root = {
+						is_target_in_variable_list = {
+							name = ec_coastline_of_market_capital
+							target = prev
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					root.market.owner = root
+					
+					#
+					
+					save_temporary_scope_as = ec_state_1
+					NOT = {
+						any_neighbouring_state = {
+							NOT = {
+								this = scope:ec_state_1
+							}
+							owner = root
+							root = {
+								is_target_in_variable_list = {
+									name = ec_coastline_of_outer_lands
+									target = prev
+								}
+							}
+						}
+					}
+					any_neighbouring_state = {
+						NOT = {
+							this = scope:ec_state_1
+						}
+						owner = root
+						save_temporary_scope_as = ec_state_2
 						NOT = {
 							any_neighbouring_state = {
 								NOT = {
@@ -787,364 +945,76 @@ ec_collect_state_level_data = {
 								owner = root
 								root = {
 									is_target_in_variable_list = {
-										name = ec_no_land_path_to_market_capital
+										name = ec_coastline_of_outer_lands
 										target = prev
 									}
 								}
 							}
 						}
-						any_neighbouring_state = {
-							NOT = {
-								this = scope:ec_state_1
-							}
-							owner = root
-							save_temporary_scope_as = ec_state_2
-							NOT = {
-								any_neighbouring_state = {
-									NOT = {
-										this = scope:ec_state_1
-									}
-									owner = root
-									root = {
-										is_target_in_variable_list = {
-											name = ec_no_land_path_to_market_capital
-											target = prev
-										}
-									}
-								}
-							}
-							OR = {
-								this = root.market_capital
-								root = {
-									is_target_in_variable_list = {
-										name = ec_has_land_path_to_market_capital
-										target = prev
-									}
-								}
-								any_neighbouring_state = {
-									NOR = {
-										this = scope:ec_state_1
-										this = scope:ec_state_2
-									}
-									owner = root
-									save_temporary_scope_as = ec_state_3
-									NOT = {
-										any_neighbouring_state = {
-											NOT = {
-												this = scope:ec_state_1
-											}
-											owner = root
-											root = {
-												is_target_in_variable_list = {
-													name = ec_no_land_path_to_market_capital
-													target = prev
-												}
-											}
-										}
-									}
-									OR = {
-										this = root.market_capital
-										root = {
-											is_target_in_variable_list = {
-												name = ec_has_land_path_to_market_capital
-												target = prev
-											}
-										}
-										any_neighbouring_state = {
-											NOR = {
-												this = scope:ec_state_1
-												this = scope:ec_state_2
-												this = scope:ec_state_3
-											}
-											owner = root
-											save_temporary_scope_as = ec_state_4
-											NOT = {
-												any_neighbouring_state = {
-													NOT = {
-														this = scope:ec_state_1
-													}
-													owner = root
-													root = {
-														is_target_in_variable_list = {
-															name = ec_no_land_path_to_market_capital
-															target = prev
-														}
-													}
-												}
-											}
-											OR = {
-												this = root.market_capital
-												root = {
-													is_target_in_variable_list = {
-														name = ec_has_land_path_to_market_capital
-														target = prev
-													}
-												}
-												any_neighbouring_state = {
-													NOR = {
-														this = scope:ec_state_1
-														this = scope:ec_state_2
-														this = scope:ec_state_3
-														this = scope:ec_state_4
-													}
-													owner = root
-													save_temporary_scope_as = ec_state_5
-													NOT = {
-														any_neighbouring_state = {
-															NOT = {
-																this = scope:ec_state_1
-															}
-															owner = root
-															root = {
-																is_target_in_variable_list = {
-																	name = ec_no_land_path_to_market_capital
-																	target = prev
-																}
-															}
-														}
-													}
-													OR = {
-														this = root.market_capital
-														root = {
-															is_target_in_variable_list = {
-																name = ec_has_land_path_to_market_capital
-																target = prev
-															}
-														}
-														any_neighbouring_state = {
-															NOR = {
-																this = scope:ec_state_1
-																this = scope:ec_state_2
-																this = scope:ec_state_3
-																this = scope:ec_state_4
-																this = scope:ec_state_5
-															}
-															owner = root
-															save_temporary_scope_as = ec_state_6
-															NOT = {
-																any_neighbouring_state = {
-																	NOT = {
-																		this = scope:ec_state_1
-																	}
-																	owner = root
-																	root = {
-																		is_target_in_variable_list = {
-																			name = ec_no_land_path_to_market_capital
-																			target = prev
-																		}
-																	}
-																}
-															}
-															OR = {
-																this = root.market_capital
-																root = {
-																	is_target_in_variable_list = {
-																		name = ec_has_land_path_to_market_capital
-																		target = prev
-																	}
-																}
-																any_neighbouring_state = {
-																	NOR = {
-																		this = scope:ec_state_1
-																		this = scope:ec_state_2
-																		this = scope:ec_state_3
-																		this = scope:ec_state_4
-																		this = scope:ec_state_5
-																		this = scope:ec_state_6
-																	}
-																	owner = root
-																	save_temporary_scope_as = ec_state_7
-																	NOT = {
-																		any_neighbouring_state = {
-																			NOT = {
-																				this = scope:ec_state_1
-																			}
-																			owner = root
-																			root = {
-																				is_target_in_variable_list = {
-																					name = ec_no_land_path_to_market_capital
-																					target = prev
-																				}
-																			}
-																		}
-																	}
-																	OR = {
-																		this = root.market_capital
-																		root = {
-																			is_target_in_variable_list = {
-																				name = ec_has_land_path_to_market_capital
-																				target = prev
-																			}
-																		}
-																		any_neighbouring_state = {
-																			NOR = {
-																				this = scope:ec_state_1
-																				this = scope:ec_state_2
-																				this = scope:ec_state_3
-																				this = scope:ec_state_4
-																				this = scope:ec_state_5
-																				this = scope:ec_state_6
-																				this = scope:ec_state_7
-																			}
-																			owner = root
-																			save_temporary_scope_as = ec_state_8
-																			NOT = {
-																				any_neighbouring_state = {
-																					NOT = {
-																						this = scope:ec_state_1
-																					}
-																					owner = root
-																					root = {
-																						is_target_in_variable_list = {
-																							name = ec_no_land_path_to_market_capital
-																							target = prev
-																						}
-																					}
-																				}
-																			}
-																			OR = {
-																				this = root.market_capital
-																				root = {
-																					is_target_in_variable_list = {
-																						name = ec_has_land_path_to_market_capital
-																						target = prev
-																					}
-																				}
-																				any_neighbouring_state = {
-																					NOR = {
-																						this = scope:ec_state_1
-																						this = scope:ec_state_2
-																						this = scope:ec_state_3
-																						this = scope:ec_state_4
-																						this = scope:ec_state_5
-																						this = scope:ec_state_6
-																						this = scope:ec_state_7
-																						this = scope:ec_state_8
-																					}
-																					owner = root
-																					save_temporary_scope_as = ec_state_9
-																					NOT = {
-																						any_neighbouring_state = {
-																							NOT = {
-																								this = scope:ec_state_1
-																							}
-																							owner = root
-																							root = {
-																								is_target_in_variable_list = {
-																									name = ec_no_land_path_to_market_capital
-																									target = prev
-																								}
-																							}
-																						}
-																					}
-																					OR = {
-																						this = root.market_capital
-																						root = {
-																							is_target_in_variable_list = {
-																								name = ec_has_land_path_to_market_capital
-																								target = prev
-																							}
-																						}
-																						any_neighbouring_state = {
-																							NOR = {
-																								this = scope:ec_state_1
-																								this = scope:ec_state_2
-																								this = scope:ec_state_3
-																								this = scope:ec_state_4
-																								this = scope:ec_state_5
-																								this = scope:ec_state_6
-																								this = scope:ec_state_7
-																								this = scope:ec_state_8
-																								this = scope:ec_state_9
-																							}
-																							owner = root
-																							NOT = {
-																								any_neighbouring_state = {
-																									NOT = {
-																										this = scope:ec_state_1
-																									}
-																									owner = root
-																									root = {
-																										is_target_in_variable_list = {
-																											name = ec_no_land_path_to_market_capital
-																											target = prev
-																										}
-																									}
-																								}
-																							}
-																							OR = {
-																								this = root.market_capital
-																								root = {
-																									is_target_in_variable_list = {
-																										name = ec_has_land_path_to_market_capital
-																										target = prev
-																									}
-																								}
-																							}
-																						}
-																					}
-																				}
-																			}
-																		}
-																	}
-																}
-															}
-														}
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-			root = {
-				add_to_variable_list = {
-					name = ec_has_land_path_to_market_capital
-					target = prev
-				}
-			}
-		}
-		else = {
-			root = {
-				add_to_variable_list = {
-					name = ec_no_land_path_to_market_capital
-					target = prev
-				}
-			}
-			if = {
-				limit = {
-					save_temporary_scope_as = ec_state_1
-					any_neighbouring_state = {
-						NOT = {
-							this = scope:ec_state_1
-						}
-						save_temporary_scope_as = ec_state_2
-						owner = root
 						OR = {
-							has_building = building_port
+							root = {
+								is_target_in_variable_list = {
+									name = ec_coastline_of_market_capital
+									target = prev
+								}
+							}
 							any_neighbouring_state = {
 								NOR = {
 									this = scope:ec_state_1
 									this = scope:ec_state_2
 								}
-								save_temporary_scope_as = ec_state_3
 								owner = root
+								save_temporary_scope_as = ec_state_3
+								NOT = {
+									any_neighbouring_state = {
+										NOT = {
+											this = scope:ec_state_1
+										}
+										owner = root
+										root = {
+											is_target_in_variable_list = {
+												name = ec_coastline_of_outer_lands
+												target = prev
+											}
+										}
+									}
+								}
 								OR = {
-									has_building = building_port
+									root = {
+										is_target_in_variable_list = {
+											name = ec_coastline_of_market_capital
+											target = prev
+										}
+									}
 									any_neighbouring_state = {
 										NOR = {
 											this = scope:ec_state_1
 											this = scope:ec_state_2
 											this = scope:ec_state_3
 										}
-										save_temporary_scope_as = ec_state_4
 										owner = root
+										save_temporary_scope_as = ec_state_4
+										NOT = {
+											any_neighbouring_state = {
+												NOT = {
+													this = scope:ec_state_1
+												}
+												owner = root
+												root = {
+													is_target_in_variable_list = {
+														name = ec_coastline_of_outer_lands
+														target = prev
+													}
+												}
+											}
+										}
 										OR = {
-											has_building = building_port
+											root = {
+												is_target_in_variable_list = {
+													name = ec_coastline_of_market_capital
+													target = prev
+												}
+											}
 											any_neighbouring_state = {
 												NOR = {
 													this = scope:ec_state_1
@@ -1152,10 +1022,29 @@ ec_collect_state_level_data = {
 													this = scope:ec_state_3
 													this = scope:ec_state_4
 												}
-												save_temporary_scope_as = ec_state_5
 												owner = root
+												save_temporary_scope_as = ec_state_5
+												NOT = {
+													any_neighbouring_state = {
+														NOT = {
+															this = scope:ec_state_1
+														}
+														owner = root
+														root = {
+															is_target_in_variable_list = {
+																name = ec_coastline_of_outer_lands
+																target = prev
+															}
+														}
+													}
+												}
 												OR = {
-													has_building = building_port
+													root = {
+														is_target_in_variable_list = {
+															name = ec_coastline_of_market_capital
+															target = prev
+														}
+													}
 													any_neighbouring_state = {
 														NOR = {
 															this = scope:ec_state_1
@@ -1165,7 +1054,170 @@ ec_collect_state_level_data = {
 															this = scope:ec_state_5
 														}
 														owner = root
-														has_building = building_port
+														save_temporary_scope_as = ec_state_6
+														NOT = {
+															any_neighbouring_state = {
+																NOT = {
+																	this = scope:ec_state_1
+																}
+																owner = root
+																root = {
+																	is_target_in_variable_list = {
+																		name = ec_coastline_of_outer_lands
+																		target = prev
+																	}
+																}
+															}
+														}
+														OR = {
+															root = {
+																is_target_in_variable_list = {
+																	name = ec_coastline_of_market_capital
+																	target = prev
+																}
+															}
+															any_neighbouring_state = {
+																NOR = {
+																	this = scope:ec_state_1
+																	this = scope:ec_state_2
+																	this = scope:ec_state_3
+																	this = scope:ec_state_4
+																	this = scope:ec_state_5
+																	this = scope:ec_state_6
+																}
+																owner = root
+																save_temporary_scope_as = ec_state_7
+																NOT = {
+																	any_neighbouring_state = {
+																		NOT = {
+																			this = scope:ec_state_1
+																		}
+																		owner = root
+																		root = {
+																			is_target_in_variable_list = {
+																				name = ec_coastline_of_outer_lands
+																				target = prev
+																			}
+																		}
+																	}
+																}
+																OR = {
+																	root = {
+																		is_target_in_variable_list = {
+																			name = ec_coastline_of_market_capital
+																			target = prev
+																		}
+																	}
+																	any_neighbouring_state = {
+																		NOR = {
+																			this = scope:ec_state_1
+																			this = scope:ec_state_2
+																			this = scope:ec_state_3
+																			this = scope:ec_state_4
+																			this = scope:ec_state_5
+																			this = scope:ec_state_6
+																			this = scope:ec_state_7
+																		}
+																		owner = root
+																		save_temporary_scope_as = ec_state_8
+																		NOT = {
+																			any_neighbouring_state = {
+																				NOT = {
+																					this = scope:ec_state_1
+																				}
+																				owner = root
+																				root = {
+																					is_target_in_variable_list = {
+																						name = ec_coastline_of_outer_lands
+																						target = prev
+																					}
+																				}
+																			}
+																		}
+																		OR = {
+																			root = {
+																				is_target_in_variable_list = {
+																					name = ec_coastline_of_market_capital
+																					target = prev
+																				}
+																			}
+																			any_neighbouring_state = {
+																				NOR = {
+																					this = scope:ec_state_1
+																					this = scope:ec_state_2
+																					this = scope:ec_state_3
+																					this = scope:ec_state_4
+																					this = scope:ec_state_5
+																					this = scope:ec_state_6
+																					this = scope:ec_state_7
+																					this = scope:ec_state_8
+																				}
+																				owner = root
+																				save_temporary_scope_as = ec_state_9
+																				NOT = {
+																					any_neighbouring_state = {
+																						NOT = {
+																							this = scope:ec_state_1
+																						}
+																						owner = root
+																						root = {
+																							is_target_in_variable_list = {
+																								name = ec_coastline_of_outer_lands
+																								target = prev
+																							}
+																						}
+																					}
+																				}
+																				OR = {
+																					root = {
+																						is_target_in_variable_list = {
+																							name = ec_coastline_of_market_capital
+																							target = prev
+																						}
+																					}
+																					any_neighbouring_state = {
+																						NOR = {
+																							this = scope:ec_state_1
+																							this = scope:ec_state_2
+																							this = scope:ec_state_3
+																							this = scope:ec_state_4
+																							this = scope:ec_state_5
+																							this = scope:ec_state_6
+																							this = scope:ec_state_7
+																							this = scope:ec_state_8
+																							this = scope:ec_state_9
+																						}
+																						owner = root
+																						NOT = {
+																							any_neighbouring_state = {
+																								NOT = {
+																									this = scope:ec_state_1
+																								}
+																								owner = root
+																								root = {
+																									is_target_in_variable_list = {
+																										name = ec_coastline_of_outer_lands
+																										target = prev
+																									}
+																								}
+																							}
+																						}
+																						OR = {
+																							root = {
+																								is_target_in_variable_list = {
+																									name = ec_coastline_of_market_capital
+																									target = prev
+																								}
+																							}
+																						}
+																					}
+																				}
+																			}
+																		}
+																	}
+																}
+															}
+														}
 													}
 												}
 											}
@@ -1178,8 +1230,90 @@ ec_collect_state_level_data = {
 				}
 				root = {
 					add_to_variable_list = {
-						name = ec_has_land_path_to_port_to_market_capital
+						name = ec_coastline_of_market_capital
 						target = prev
+					}
+					ec_update_coastline_of_market_capital = yes
+				}
+			}
+			else = {
+				root = {
+					add_to_variable_list = {
+						name = ec_coastline_of_outer_lands
+						target = prev
+					}
+				}
+				if = {
+					limit = {
+						has_building = building_port
+					}
+					if = {
+						limit = {
+							save_temporary_scope_as = ec_state_1
+							any_neighbouring_state = {
+								NOT = {
+									this = scope:ec_state_1
+								}
+								save_temporary_scope_as = ec_state_2
+								owner = root
+								OR = {
+									has_building = building_port
+									any_neighbouring_state = {
+										NOR = {
+											this = scope:ec_state_1
+											this = scope:ec_state_2
+										}
+										save_temporary_scope_as = ec_state_3
+										owner = root
+										OR = {
+											has_building = building_port
+											any_neighbouring_state = {
+												NOR = {
+													this = scope:ec_state_1
+													this = scope:ec_state_2
+													this = scope:ec_state_3
+												}
+												save_temporary_scope_as = ec_state_4
+												owner = root
+												OR = {
+													has_building = building_port
+													any_neighbouring_state = {
+														NOR = {
+															this = scope:ec_state_1
+															this = scope:ec_state_2
+															this = scope:ec_state_3
+															this = scope:ec_state_4
+														}
+														save_temporary_scope_as = ec_state_5
+														owner = root
+														OR = {
+															has_building = building_port
+															any_neighbouring_state = {
+																NOR = {
+																	this = scope:ec_state_1
+																	this = scope:ec_state_2
+																	this = scope:ec_state_3
+																	this = scope:ec_state_4
+																	this = scope:ec_state_5
+																}
+																owner = root
+																has_building = building_port
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+						root = {
+							add_to_variable_list = {
+								name = ec_safe_to_remove_ports_in_outer_lands
+								target = prev
+							}
+						}
 					}
 				}
 			}
@@ -1523,12 +1657,32 @@ ec_downsize_excess_buildings = {
 	if = {
 		limit = {
 			OR = {
-				modifier:country_construction_add >= ec_construction_points_excess
-				ec_construction_costs_value > ec_construction_costs_excess
 				AND = {
 					NOT = {
 						ec_budget_health = {
-							level = -3
+							level = -1
+						}
+					}
+					OR = {
+						modifier:country_construction_add >= ec_construction_points_excess
+						ec_construction_costs_value > ec_construction_costs_excess
+					}
+				}
+				AND = {
+					NOT = {
+						ec_budget_health = {
+							level = -2
+						}
+					}
+					OR = {
+						modifier:country_construction_add >= ec_construction_points_target
+						ec_construction_costs_value > ec_construction_costs_target
+					}
+				}
+				AND = {
+					NOT = {
+						ec_budget_health = {
+							level = -4
 						}
 					}
 					NOR = {
@@ -1607,12 +1761,24 @@ ec_downsize_excess_buildings = {
 							level = -2
 						}
 					}
-					var:ec_government_costs >= ec_government_costs_excess
+					OR = {
+						modifier:country_weekly_innovation_add >= ec_innovation_target
+						ec_university_count >= ec_university_target
+						var:ec_government_costs >= ec_government_costs_excess
+					}
 				}
 				AND = {
 					NOT = {
 						ec_budget_health = {
 							level = -3
+						}
+					}
+					var:ec_government_costs >= ec_government_costs_target
+				}
+				AND = {
+					NOT = {
+						ec_budget_health = {
+							level = -4
 						}
 					}
 					NOR = {
@@ -1708,6 +1874,14 @@ ec_downsize_excess_buildings = {
 				AND = {
 					NOT = {
 						ec_budget_health = {
+							level = -3
+						}
+					}
+					var:ec_government_costs >= ec_government_costs_target
+				}
+				AND = {
+					NOT = {
+						ec_budget_health = {
 							level = -4
 						}
 					}
@@ -1734,28 +1908,36 @@ ec_downsize_excess_buildings = {
 				has_building = building_port
 				OR = {
 					root = {
-						NAND = {
-							has_variable_list = ec_no_land_path_to_market_capital
-							variable_list_size = {
-								name = ec_no_land_path_to_market_capital
-								value > 0
+						NOR = {
+							AND = {
+								has_variable_list = ec_coastline_of_outer_lands
+								variable_list_size = {
+									name = ec_coastline_of_outer_lands
+									value > 0
+								}
+							}
+							any_country = {
+								market.owner = root
+								any_scope_state = {
+									is_coastal = yes
+								}
 							}
 						}
 					}
 					root = {
 						is_target_in_variable_list = {
-							name = ec_has_land_path_to_market_capital
+							name = ec_coastline_of_market_capital
 							target = prev
 						}
 						any_in_list = {
-							variable = ec_has_land_path_to_market_capital
+							variable = ec_coastline_of_market_capital
 							count > 1
 							has_building = building_port
 						}
 					}
 					root = {
 						is_target_in_variable_list = {
-							name = ec_has_land_path_to_market_capital
+							name = ec_safe_to_remove_ports_in_outer_lands
 							target = prev
 						}
 					}
@@ -1767,28 +1949,36 @@ ec_downsize_excess_buildings = {
 				has_building = building_port
 				OR = {
 					root = {
-						NAND = {
-							has_variable_list = ec_no_land_path_to_market_capital
-							variable_list_size = {
-								name = ec_no_land_path_to_market_capital
-								value > 0
+						NOR = {
+							AND = {
+								has_variable_list = ec_coastline_of_outer_lands
+								variable_list_size = {
+									name = ec_coastline_of_outer_lands
+									value > 0
+								}
+							}
+							any_country = {
+								market.owner = root
+								any_scope_state = {
+									is_coastal = yes
+								}
 							}
 						}
 					}
 					root = {
 						is_target_in_variable_list = {
-							name = ec_has_land_path_to_market_capital
+							name = ec_coastline_of_market_capital
 							target = prev
 						}
 						any_in_list = {
-							variable = ec_has_land_path_to_market_capital
+							variable = ec_coastline_of_market_capital
 							count > 1
 							has_building = building_port
 						}
 					}
 					root = {
 						is_target_in_variable_list = {
-							name = ec_has_land_path_to_market_capital
+							name = ec_safe_to_remove_ports_in_outer_lands
 							target = prev
 						}
 					}
@@ -1800,28 +1990,36 @@ ec_downsize_excess_buildings = {
 							has_building = building_port
 							OR = {
 								root = {
-									NAND = {
-										has_variable_list = ec_no_land_path_to_market_capital
-										variable_list_size = {
-											name = ec_no_land_path_to_market_capital
-											value > 0
+									NOR = {
+										AND = {
+											has_variable_list = ec_coastline_of_outer_lands
+											variable_list_size = {
+												name = ec_coastline_of_outer_lands
+												value > 0
+											}
+										}
+										any_country = {
+											market.owner = root
+											any_scope_state = {
+												is_coastal = yes
+											}
 										}
 									}
 								}
 								root = {
 									is_target_in_variable_list = {
-										name = ec_has_land_path_to_market_capital
+										name = ec_coastline_of_market_capital
 										target = prev
 									}
 									any_in_list = {
-										variable = ec_has_land_path_to_market_capital
+										variable = ec_coastline_of_market_capital
 										count > 1
 										has_building = building_port
 									}
 								}
 								root = {
 									is_target_in_variable_list = {
-										name = ec_has_land_path_to_market_capital
+										name = ec_safe_to_remove_ports_in_outer_lands
 										target = prev
 									}
 								}
@@ -1867,31 +2065,42 @@ ec_downsize_excess_buildings = {
 			}
 			OR = {
 				AND = {
-					OR = {
-						AND = {
-							NOT = {
-								ec_budget_health = {
-									level = 0
-								}
-							}
-							OR = {
-								var:ec_barracks_count >= ec_battalions_ceiling
-								ec_military_costs_value >= ec_military_costs_ceiling
-							}
-						}
-						AND = {
-							NOT = {
-								ec_budget_health = {
-									level = -1
-								}
-							}
-							OR = {
-								var:ec_barracks_count >= ec_battalions_excess
-								ec_military_costs_value >= ec_military_costs_excess
-							}
+					NOT = {
+						ec_budget_health = {
+							level = 0
 						}
 					}
-					var:ec_barracks_count >= ec_battalions_threshold
+					var:ec_barracks_count >= ec_battalions_ceiling
+				}
+				AND = {
+					NOT = {
+						ec_budget_health = {
+							level = -1
+						}
+					}
+					OR = {
+						var:ec_barracks_count >= ec_battalions_excess
+						ec_military_costs_value >= ec_military_costs_ceiling
+					}
+				}
+				AND = {
+					NOT = {
+						ec_budget_health = {
+							level = -2
+						}
+					}
+					OR = {
+						var:ec_barracks_count >= ec_battalions_target
+						ec_military_costs_value >= ec_military_costs_excess
+					}
+				}
+				AND = {
+					NOT = {
+						ec_budget_health = {
+							level = -3
+						}
+					}
+					ec_military_costs_value >= ec_military_costs_target
 				}
 				NOT = {
 					ec_budget_health = {
@@ -1899,6 +2108,7 @@ ec_downsize_excess_buildings = {
 					}
 				}
 			}
+			var:ec_barracks_count >= ec_battalions_threshold
 			any_scope_state = { has_building = building_barracks }
 		}
 		random_scope_state = {
@@ -1945,31 +2155,42 @@ ec_downsize_excess_buildings = {
 			}
 			OR = {
 				AND = {
-					OR = {
-						AND = {
-							NOT = {
-								ec_budget_health = {
-									level = 0
-								}
-							}
-							OR = {
-								navy_size >= ec_flotillas_ceiling
-								ec_military_costs_value >= ec_military_costs_ceiling
-							}
-						}
-						AND = {
-							NOT = {
-								ec_budget_health = {
-									level = -1
-								}
-							}
-							OR = {
-								navy_size >= ec_flotillas_excess
-								ec_military_costs_value >= ec_military_costs_excess
-							}
+					NOT = {
+						ec_budget_health = {
+							level = 0
 						}
 					}
-					navy_size >= ec_flotillas_threshold
+					navy_size >= ec_flotillas_ceiling
+				}
+				AND = {
+					NOT = {
+						ec_budget_health = {
+							level = -1
+						}
+					}
+					OR = {
+						navy_size >= ec_flotillas_excess
+						ec_military_costs_value >= ec_military_costs_ceiling
+					}
+				}
+				AND = {
+					NOT = {
+						ec_budget_health = {
+							level = -2
+						}
+					}
+					OR = {
+						navy_size >= ec_flotillas_target
+						ec_military_costs_value >= ec_military_costs_excess
+					}
+				}
+				AND = {
+					NOT = {
+						ec_budget_health = {
+							level = -3
+						}
+					}
+					ec_military_costs_value >= ec_military_costs_target
 				}
 				NOT = {
 					ec_budget_health = {
@@ -1977,6 +2198,7 @@ ec_downsize_excess_buildings = {
 					}
 				}
 			}
+			navy_size >= ec_flotillas_threshold
 			any_scope_state = { has_building = building_naval_base }
 		}
 		random_scope_state = {
@@ -2303,9 +2525,9 @@ ec_clear_building_variables = {
 	remove_variable = ec_square_root_of_minus_half_unincorporated_gdp_per_capita
 	remove_variable = ec_surplus_bureaucracy_target
 	
-	clear_variable_list = ec_has_land_path_to_market_capital
-	clear_variable_list = ec_no_land_path_to_market_capital
-	clear_variable_list = ec_has_land_path_to_port_to_market_capital
+	clear_variable_list = ec_coastline_of_market_capital
+	clear_variable_list = ec_coastline_of_outer_lands
+	clear_variable_list = ec_safe_to_remove_ports_in_outer_lands
 	
 	# Variables from downsizing that are used in building as well
 	
@@ -2342,15 +2564,184 @@ ec_clear_building_variables = {
 	}
 }
 
+### DECHIPER ecpar
+
+ec_decipher_ecpar = {
+	set_variable = {
+		name = ecpar
+		value = state_region.var:ecpar
+	}
+	set_variable = {
+		name = ecpar1
+		value = var:ecpar
+	}
+	if = {
+		limit = {
+			var:ecpar >= 300000
+		}
+		change_variable = {
+			name = ecpar
+			subtract = 300000
+		}
+	}
+	else_if = {
+		limit = {
+			var:ecpar >= 200000
+		}
+		change_variable = {
+			name = ecpar
+			subtract = 200000
+		}
+	}
+	else_if = {
+		limit = {
+			var:ecpar >= 100000
+		}
+		change_variable = {
+			name = ecpar
+			subtract = 100000
+		}
+	}
+	set_variable = {
+		name = ecpar2
+		value = var:ecpar
+	}
+	if = {
+		limit = {
+			var:ecpar >= 30000
+		}
+		change_variable = {
+			name = ecpar
+			subtract = 30000
+		}
+	}
+	else_if = {
+		limit = {
+			var:ecpar >= 20000
+		}
+		change_variable = {
+			name = ecpar
+			subtract = 20000
+		}
+	}
+	else_if = {
+		limit = {
+			var:ecpar >= 10000
+		}
+		change_variable = {
+			name = ecpar
+			subtract = 10000
+		}
+	}
+	set_variable = {
+		name = ecpar3
+		value = var:ecpar
+	}
+	if = {
+		limit = {
+			var:ecpar >= 3000
+		}
+		change_variable = {
+			name = ecpar
+			subtract = 3000
+		}
+	}
+	else_if = {
+		limit = {
+			var:ecpar >= 2000
+		}
+		change_variable = {
+			name = ecpar
+			subtract = 2000
+		}
+	}
+	else_if = {
+		limit = {
+			var:ecpar >= 1000
+		}
+		change_variable = {
+			name = ecpar
+			subtract = 1000
+		}
+	}
+	set_variable = {
+		name = ecpar4
+		value = var:ecpar
+	}
+	if = {
+		limit = {
+			var:ecpar >= 300
+		}
+		change_variable = {
+			name = ecpar
+			subtract = 300
+		}
+	}
+	else_if = {
+		limit = {
+			var:ecpar >= 200
+		}
+		change_variable = {
+			name = ecpar
+			subtract = 200
+		}
+	}
+	else_if = {
+		limit = {
+			var:ecpar >= 100
+		}
+		change_variable = {
+			name = ecpar
+			subtract = 100
+		}
+	}
+	set_variable = {
+		name = ecpar5
+		value = var:ecpar
+	}
+	if = {
+		limit = {
+			var:ecpar >= 30
+		}
+		change_variable = {
+			name = ecpar
+			subtract = 30
+		}
+	}
+	else_if = {
+		limit = {
+			var:ecpar >= 20
+		}
+		change_variable = {
+			name = ecpar
+			subtract = 20
+		}
+	}
+	else_if = {
+		limit = {
+			var:ecpar >= 10
+		}
+		change_variable = {
+			name = ecpar
+			subtract = 10
+		}
+	}
+	set_variable = {
+		name = ecpar6
+		value = var:ecpar
+	}
+	remove_variable = ecpar
+}
+
 ### BUILDING CODE GENERATED BY OUTSIDE SCRIPT
 
 ec_create_identifying_object_list = { clear_global_variable_list = cbiol every_state_region = { if = { limit = { has_variable = cbiob } remove_variable = cbiob } if = { limit = { has_variable = cbpor } remove_variable = cbpor } } set_variable = { name = cbiob value = 1 } while = { limit = { var:cbiob <= ec_amount_of_building_types } random_state_region = { limit = { NOT = { has_variable = cbiob } } add_to_global_variable_list = { name = cbiol target = this } set_variable = { name = cbiob value = prev.var:cbiob } if = { limit = { var:cbiob = 1 } set_variable = { name = cbpor value = 1 } } else_if = { limit = { var:cbiob = 2 } set_variable = { name = cbpor value = 2 } } else_if = { limit = { var:cbiob = 3 } set_variable = { name = cbpor value = 9 } } else_if = { limit = { var:cbiob = 4 } set_variable = { name = cbpor value = 3 } } else_if = { limit = { var:cbiob = 5 } set_variable = { name = cbpor value = 3 } } else_if = { limit = { var:cbiob = 6 } set_variable = { name = cbpor value = 9 } } else_if = { limit = { var:cbiob = 7 } set_variable = { name = cbpor value = 9 } } else_if = { limit = { var:cbiob = 8 } set_variable = { name = cbpor value = 5 } } else_if = { limit = { var:cbiob = 9 } set_variable = { name = cbpor value = 13 } } else_if = { limit = { var:cbiob = 10 } set_variable = { name = cbpor value = 5 } } else_if = { limit = { var:cbiob = 11 } set_variable = { name = cbpor value = 5 } } else_if = { limit = { var:cbiob = 12 } set_variable = { name = cbpor value = 5 } } else_if = { limit = { var:cbiob = 13 } set_variable = { name = cbpor value = 6 } } else_if = { limit = { var:cbiob = 14 } set_variable = { name = cbpor value = 5 } } else_if = { limit = { var:cbiob = 15 } set_variable = { name = cbpor value = 11 } } else_if = { limit = { var:cbiob = 16 } set_variable = { name = cbpor value = 6 } } else_if = { limit = { var:cbiob = 17 } set_variable = { name = cbpor value = 4 } } else_if = { limit = { var:cbiob = 18 } set_variable = { name = cbpor value = 10 } } else_if = { limit = { var:cbiob = 19 } set_variable = { name = cbpor value = 10 } } else_if = { limit = { var:cbiob = 20 } set_variable = { name = cbpor value = 10 } } else_if = { limit = { var:cbiob = 21 } set_variable = { name = cbpor value = 10 } } else_if = { limit = { var:cbiob = 22 } set_variable = { name = cbpor value = 10 } } else_if = { limit = { var:cbiob = 23 } set_variable = { name = cbpor value = 5 } } else_if = { limit = { var:cbiob = 24 } set_variable = { name = cbpor value = 5 } } else_if = { limit = { var:cbiob = 25 } set_variable = { name = cbpor value = 11 } } else_if = { limit = { var:cbiob = 26 } set_variable = { name = cbpor value = 11 } } else_if = { limit = { var:cbiob = 27 } set_variable = { name = cbpor value = 13 } } else_if = { limit = { var:cbiob = 28 } set_variable = { name = cbpor value = 13 } } else_if = { limit = { var:cbiob = 29 } set_variable = { name = cbpor value = 15 } } else_if = { limit = { var:cbiob = 30 } set_variable = { name = cbpor value = 15 } } else_if = { limit = { var:cbiob = 31 } set_variable = { name = cbpor value = 14 } } else_if = { limit = { var:cbiob = 32 } set_variable = { name = cbpor value = 14 } } else_if = { limit = { var:cbiob = 33 } set_variable = { name = cbpor value = 14 } } else_if = { limit = { var:cbiob = 34 } set_variable = { name = cbpor value = 15 } } else_if = { limit = { var:cbiob = 35 } set_variable = { name = cbpor value = 12 } } else_if = { limit = { var:cbiob = 36 } set_variable = { name = cbpor value = 12 } } else_if = { limit = { var:cbiob = 37 } set_variable = { name = cbpor value = 7 } } else_if = { limit = { var:cbiob = 38 } set_variable = { name = cbpor value = 4 } } else_if = { limit = { var:cbiob = 39 } set_variable = { name = cbpor value = 6 } } else_if = { limit = { var:cbiob = 40 } set_variable = { name = cbpor value = 6 } } else_if = { limit = { var:cbiob = 41 } set_variable = { name = cbpor value = 11 } } else_if = { limit = { var:cbiob = 42 } set_variable = { name = cbpor value = 6 } } else_if = { limit = { var:cbiob = 43 } set_variable = { name = cbpor value = 7 } } else_if = { limit = { var:cbiob = 44 } set_variable = { name = cbpor value = 4 } } else_if = { limit = { var:cbiob = 45 } set_variable = { name = cbpor value = 8 } } else_if = { limit = { var:cbiob = 46 } set_variable = { name = cbpor value = 7 } } else_if = { limit = { var:cbiob = 47 } set_variable = { name = cbpor value = 7 } } else_if = { limit = { var:cbiob = 48 } set_variable = { name = cbpor value = 8 } } else_if = { limit = { var:cbiob = 49 } set_variable = { name = cbpor value = 8 } } } change_variable = { name = cbiob add = 1 } } remove_variable = cbiob }
 
 ec_start_arable_resources_check = {
-every_country = { every_scope_state = { limit = { state_region = { NOR = { has_variable = ec_checking_arable_resources has_variable = ec_checked_arable_resources } } } state_region = { set_variable = ec_checking_arable_resources remove_list_global_variable = { name = bg_wheat_farms target = this } remove_list_global_variable = { name = bg_rye_farms target = this } remove_list_global_variable = { name = bg_rice_farms target = this } remove_list_global_variable = { name = bg_maize_farms target = this } remove_list_global_variable = { name = bg_millet_farms target = this } remove_list_global_variable = { name = bg_livestock_ranches target = this } remove_list_global_variable = { name = bg_cotton_plantations target = this } remove_list_global_variable = { name = bg_dye_plantations target = this } remove_list_global_variable = { name = bg_silk_plantations target = this } remove_list_global_variable = { name = bg_banana_plantations target = this } remove_list_global_variable = { name = bg_sugar_plantations target = this } remove_list_global_variable = { name = bg_tea_plantations target = this } remove_list_global_variable = { name = bg_coffee_plantations target = this } remove_list_global_variable = { name = bg_tobacco_plantations target = this } remove_list_global_variable = { name = bg_opium_plantations target = this } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_wheat_farm } } } add_to_global_variable_list = { name = bg_wheat_farms target = this } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_wheat_farm state_region = { set_variable = ec_checking_wheat_farm } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_rye_farm } } } add_to_global_variable_list = { name = bg_rye_farms target = this } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_rye_farm state_region = { set_variable = ec_checking_rye_farm } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_rice_farm } } } add_to_global_variable_list = { name = bg_rice_farms target = this } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_rice_farm state_region = { set_variable = ec_checking_rice_farm } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_maize_farm } } } add_to_global_variable_list = { name = bg_maize_farms target = this } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_maize_farm state_region = { set_variable = ec_checking_maize_farm } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_millet_farm } } } add_to_global_variable_list = { name = bg_millet_farms target = this } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_millet_farm state_region = { set_variable = ec_checking_millet_farm } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_livestock_ranch } } } add_to_global_variable_list = { name = bg_livestock_ranches target = this } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_livestock_ranch state_region = { set_variable = ec_checking_livestock_ranch } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_cotton_plantation } } } add_to_global_variable_list = { name = bg_cotton_plantations target = this } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_cotton_plantation state_region = { set_variable = ec_checking_cotton_plantation } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_dye_plantation } } } add_to_global_variable_list = { name = bg_dye_plantations target = this } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_dye_plantation state_region = { set_variable = ec_checking_dye_plantation } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_silk_plantation } } } add_to_global_variable_list = { name = bg_silk_plantations target = this } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_silk_plantation state_region = { set_variable = ec_checking_silk_plantation } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_banana_plantation } } } add_to_global_variable_list = { name = bg_banana_plantations target = this } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_banana_plantation state_region = { set_variable = ec_checking_banana_plantation } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_sugar_plantation } } } add_to_global_variable_list = { name = bg_sugar_plantations target = this } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_sugar_plantation state_region = { set_variable = ec_checking_sugar_plantation } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_tea_plantation } } } add_to_global_variable_list = { name = bg_tea_plantations target = this } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_tea_plantation state_region = { set_variable = ec_checking_tea_plantation } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_coffee_plantation } } } add_to_global_variable_list = { name = bg_coffee_plantations target = this } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_coffee_plantation state_region = { set_variable = ec_checking_coffee_plantation } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_tobacco_plantation } } } add_to_global_variable_list = { name = bg_tobacco_plantations target = this } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_tobacco_plantation state_region = { set_variable = ec_checking_tobacco_plantation } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_opium_plantation } } } add_to_global_variable_list = { name = bg_opium_plantations target = this } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_opium_plantation state_region = { set_variable = ec_checking_opium_plantation } } } } } } }
+every_country = { every_scope_state = { limit = { state_region = { NOR = { has_variable = eccar } } } state_region = { set_variable = eccar if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_wheat_farm } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 1 } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_wheat_farm state_region = { set_variable = ecc18 } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_rye_farm } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 2 } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_rye_farm state_region = { set_variable = ecc19 } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_rice_farm } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 3 } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_rice_farm state_region = { set_variable = ecc20 } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_maize_farm } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 4 } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_maize_farm state_region = { set_variable = ecc21 } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_millet_farm } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 5 } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_millet_farm state_region = { set_variable = ecc22 } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_livestock_ranch } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 10 } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_livestock_ranch state_region = { set_variable = ecc23 } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_cotton_plantation } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 20 } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_cotton_plantation state_region = { set_variable = ecc24 } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_dye_plantation } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 100 } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_dye_plantation state_region = { set_variable = ecc25 } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_silk_plantation } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 200 } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_silk_plantation state_region = { set_variable = ecc26 } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_banana_plantation } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 1000 } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_banana_plantation state_region = { set_variable = ecc27 } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_sugar_plantation } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 2000 } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_sugar_plantation state_region = { set_variable = ecc28 } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_tea_plantation } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 10000 } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_tea_plantation state_region = { set_variable = ecc29 } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_coffee_plantation } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 20000 } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_coffee_plantation state_region = { set_variable = ecc30 } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_tobacco_plantation } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 100000 } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_tobacco_plantation state_region = { set_variable = ecc31 } } } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_opium_plantation } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 200000 } } else = { if = { limit = { NOT = { any_scope_state = { free_arable_land > 0 } } } add_arable_land = 1 set_variable = cb_changed_arable_land } random_scope_state = { limit = { free_arable_land > 0 } start_building_construction = building_opium_plantation state_region = { set_variable = ecc32 } } } } } } }
 
 ec_finish_arable_resources_check = {
-every_country = { every_scope_state = { limit = { state_region = { has_variable = ec_checking_arable_resources } } state_region = {  if = { limit = { has_variable = ec_checking_wheat_farm } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_wheat_farm } } } add_to_global_variable_list = { name = bg_wheat_farms target = this } every_scope_state = { limit = { any_scope_building = { is_building_type =building_wheat_farm } } remove_building = building_wheat_farm } } remove_variable = ec_checking_wheat_farm } if = { limit = { has_variable = ec_checking_rye_farm } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_rye_farm } } } add_to_global_variable_list = { name = bg_rye_farms target = this } every_scope_state = { limit = { any_scope_building = { is_building_type =building_rye_farm } } remove_building = building_rye_farm } } remove_variable = ec_checking_rye_farm } if = { limit = { has_variable = ec_checking_rice_farm } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_rice_farm } } } add_to_global_variable_list = { name = bg_rice_farms target = this } every_scope_state = { limit = { any_scope_building = { is_building_type =building_rice_farm } } remove_building = building_rice_farm } } remove_variable = ec_checking_rice_farm } if = { limit = { has_variable = ec_checking_maize_farm } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_maize_farm } } } add_to_global_variable_list = { name = bg_maize_farms target = this } every_scope_state = { limit = { any_scope_building = { is_building_type =building_maize_farm } } remove_building = building_maize_farm } } remove_variable = ec_checking_maize_farm } if = { limit = { has_variable = ec_checking_millet_farm } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_millet_farm } } } add_to_global_variable_list = { name = bg_millet_farms target = this } every_scope_state = { limit = { any_scope_building = { is_building_type =building_millet_farm } } remove_building = building_millet_farm } } remove_variable = ec_checking_millet_farm } if = { limit = { has_variable = ec_checking_livestock_ranch } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_livestock_ranch } } } add_to_global_variable_list = { name = bg_livestock_ranches target = this } every_scope_state = { limit = { any_scope_building = { is_building_type =building_livestock_ranch } } remove_building = building_livestock_ranch } } remove_variable = ec_checking_livestock_ranch } if = { limit = { has_variable = ec_checking_cotton_plantation } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_cotton_plantation } } } add_to_global_variable_list = { name = bg_cotton_plantations target = this } every_scope_state = { limit = { any_scope_building = { is_building_type =building_cotton_plantation } } remove_building = building_cotton_plantation } } remove_variable = ec_checking_cotton_plantation } if = { limit = { has_variable = ec_checking_dye_plantation } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_dye_plantation } } } add_to_global_variable_list = { name = bg_dye_plantations target = this } every_scope_state = { limit = { any_scope_building = { is_building_type =building_dye_plantation } } remove_building = building_dye_plantation } } remove_variable = ec_checking_dye_plantation } if = { limit = { has_variable = ec_checking_silk_plantation } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_silk_plantation } } } add_to_global_variable_list = { name = bg_silk_plantations target = this } every_scope_state = { limit = { any_scope_building = { is_building_type =building_silk_plantation } } remove_building = building_silk_plantation } } remove_variable = ec_checking_silk_plantation } if = { limit = { has_variable = ec_checking_banana_plantation } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_banana_plantation } } } add_to_global_variable_list = { name = bg_banana_plantations target = this } every_scope_state = { limit = { any_scope_building = { is_building_type =building_banana_plantation } } remove_building = building_banana_plantation } } remove_variable = ec_checking_banana_plantation } if = { limit = { has_variable = ec_checking_sugar_plantation } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_sugar_plantation } } } add_to_global_variable_list = { name = bg_sugar_plantations target = this } every_scope_state = { limit = { any_scope_building = { is_building_type =building_sugar_plantation } } remove_building = building_sugar_plantation } } remove_variable = ec_checking_sugar_plantation } if = { limit = { has_variable = ec_checking_tea_plantation } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_tea_plantation } } } add_to_global_variable_list = { name = bg_tea_plantations target = this } every_scope_state = { limit = { any_scope_building = { is_building_type =building_tea_plantation } } remove_building = building_tea_plantation } } remove_variable = ec_checking_tea_plantation } if = { limit = { has_variable = ec_checking_coffee_plantation } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_coffee_plantation } } } add_to_global_variable_list = { name = bg_coffee_plantations target = this } every_scope_state = { limit = { any_scope_building = { is_building_type =building_coffee_plantation } } remove_building = building_coffee_plantation } } remove_variable = ec_checking_coffee_plantation } if = { limit = { has_variable = ec_checking_tobacco_plantation } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_tobacco_plantation } } } add_to_global_variable_list = { name = bg_tobacco_plantations target = this } every_scope_state = { limit = { any_scope_building = { is_building_type =building_tobacco_plantation } } remove_building = building_tobacco_plantation } } remove_variable = ec_checking_tobacco_plantation } if = { limit = { has_variable = ec_checking_opium_plantation } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_opium_plantation } } } add_to_global_variable_list = { name = bg_opium_plantations target = this } every_scope_state = { limit = { any_scope_building = { is_building_type =building_opium_plantation } } remove_building = building_opium_plantation } } remove_variable = ec_checking_opium_plantation } if = { limit = { has_variable = cb_changed_arable_land } add_arable_land = -1 remove_variable = cb_changed_arable_land } if = { limit = { OR = { is_target_in_global_variable_list = { name = bg_wheat_farms target = this } is_target_in_global_variable_list = { name = bg_rye_farms target = this } is_target_in_global_variable_list = { name = bg_rice_farms target = this } is_target_in_global_variable_list = { name = bg_maize_farms target = this } is_target_in_global_variable_list = { name = bg_millet_farms target = this } is_target_in_global_variable_list = { name = bg_livestock_ranches target = this } is_target_in_global_variable_list = { name = bg_cotton_plantations target = this } is_target_in_global_variable_list = { name = bg_dye_plantations target = this } is_target_in_global_variable_list = { name = bg_silk_plantations target = this } is_target_in_global_variable_list = { name = bg_banana_plantations target = this } is_target_in_global_variable_list = { name = bg_sugar_plantations target = this } is_target_in_global_variable_list = { name = bg_tea_plantations target = this } is_target_in_global_variable_list = { name = bg_coffee_plantations target = this } is_target_in_global_variable_list = { name = bg_tobacco_plantations target = this } is_target_in_global_variable_list = { name = bg_opium_plantations target = this } } } set_variable = ec_checked_arable_resources } remove_variable = ec_checking_arable_resources } } } }
+every_country = { every_scope_state = { limit = { state_region = { has_variable = eccar } } state_region = {  if = { limit = { has_variable = ecc18 } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_wheat_farm } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 1 } every_scope_state = { limit = { any_scope_building = { is_building_type = building_wheat_farm } } remove_building = building_wheat_farm } } remove_variable = ecc18 } if = { limit = { has_variable = ecc19 } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_rye_farm } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 2 } every_scope_state = { limit = { any_scope_building = { is_building_type = building_rye_farm } } remove_building = building_rye_farm } } remove_variable = ecc19 } if = { limit = { has_variable = ecc20 } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_rice_farm } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 3 } every_scope_state = { limit = { any_scope_building = { is_building_type = building_rice_farm } } remove_building = building_rice_farm } } remove_variable = ecc20 } if = { limit = { has_variable = ecc21 } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_maize_farm } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 4 } every_scope_state = { limit = { any_scope_building = { is_building_type = building_maize_farm } } remove_building = building_maize_farm } } remove_variable = ecc21 } if = { limit = { has_variable = ecc22 } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_millet_farm } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 5 } every_scope_state = { limit = { any_scope_building = { is_building_type = building_millet_farm } } remove_building = building_millet_farm } } remove_variable = ecc22 } if = { limit = { has_variable = ecc23 } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_livestock_ranch } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 10 } every_scope_state = { limit = { any_scope_building = { is_building_type = building_livestock_ranch } } remove_building = building_livestock_ranch } } remove_variable = ecc23 } if = { limit = { has_variable = ecc24 } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_cotton_plantation } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 20 } every_scope_state = { limit = { any_scope_building = { is_building_type = building_cotton_plantation } } remove_building = building_cotton_plantation } } remove_variable = ecc24 } if = { limit = { has_variable = ecc25 } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_dye_plantation } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 100 } every_scope_state = { limit = { any_scope_building = { is_building_type = building_dye_plantation } } remove_building = building_dye_plantation } } remove_variable = ecc25 } if = { limit = { has_variable = ecc26 } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_silk_plantation } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 200 } every_scope_state = { limit = { any_scope_building = { is_building_type = building_silk_plantation } } remove_building = building_silk_plantation } } remove_variable = ecc26 } if = { limit = { has_variable = ecc27 } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_banana_plantation } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 1000 } every_scope_state = { limit = { any_scope_building = { is_building_type = building_banana_plantation } } remove_building = building_banana_plantation } } remove_variable = ecc27 } if = { limit = { has_variable = ecc28 } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_sugar_plantation } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 2000 } every_scope_state = { limit = { any_scope_building = { is_building_type = building_sugar_plantation } } remove_building = building_sugar_plantation } } remove_variable = ecc28 } if = { limit = { has_variable = ecc29 } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_tea_plantation } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 10000 } every_scope_state = { limit = { any_scope_building = { is_building_type = building_tea_plantation } } remove_building = building_tea_plantation } } remove_variable = ecc29 } if = { limit = { has_variable = ecc30 } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_coffee_plantation } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 20000 } every_scope_state = { limit = { any_scope_building = { is_building_type = building_coffee_plantation } } remove_building = building_coffee_plantation } } remove_variable = ecc30 } if = { limit = { has_variable = ecc31 } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_tobacco_plantation } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 100000 } every_scope_state = { limit = { any_scope_building = { is_building_type = building_tobacco_plantation } } remove_building = building_tobacco_plantation } } remove_variable = ecc31 } if = { limit = { has_variable = ecc32 } if = { limit = { any_scope_state = { any_scope_building = { is_building_type = building_opium_plantation } } } if = { limit = { NOT = { has_variable = ecpar } } set_variable = { name = ecpar value = 0 } } change_variable = { name = ecpar add = 200000 } every_scope_state = { limit = { any_scope_building = { is_building_type = building_opium_plantation } } remove_building = building_opium_plantation } } remove_variable = ecc32 } if = { limit = { has_variable = cb_changed_arable_land } add_arable_land = -1 remove_variable = cb_changed_arable_land } remove_variable = eccar } } } }
 
 ec_check_excess_production_on_country_level = {
 if = { limit = { ec_evaluate_logging_camp = { priority = 0 } } set_variable = cbob8 } if = { limit = { ec_evaluate_fishing_wharf = { priority = 0 } } set_variable = cbob9 } if = { limit = { ec_evaluate_whaling_station = { priority = 0 } } set_variable = cbob10 } if = { limit = { ec_evaluate_coal_mine = { priority = 0 } } set_variable = cbob11 } if = { limit = { ec_evaluate_iron_mine = { priority = 0 } } set_variable = cbob12 } if = { limit = { ec_evaluate_lead_mine = { priority = 0 } } set_variable = cbob13 } if = { limit = { ec_evaluate_sulfur_mine = { priority = 0 } } set_variable = cbob14 } if = { limit = { ec_evaluate_gold_mine = { priority = 0 } } set_variable = cbob15 } if = { limit = { ec_evaluate_rubber_plantation = { priority = 0 } } set_variable = cbob16 } if = { limit = { ec_evaluate_oil_rig = { priority = 0 } } set_variable = cbob17 } if = { limit = { ec_evaluate_wheat_farm = { priority = 0 } } set_variable = cbob18 } if = { limit = { ec_evaluate_rye_farm = { priority = 0 } } set_variable = cbob19 } if = { limit = { ec_evaluate_rice_farm = { priority = 0 } } set_variable = cbob20 } if = { limit = { ec_evaluate_maize_farm = { priority = 0 } } set_variable = cbob21 } if = { limit = { ec_evaluate_millet_farm = { priority = 0 } } set_variable = cbob22 } if = { limit = { ec_evaluate_livestock_ranch = { priority = 0 } } set_variable = cbob23 } if = { limit = { ec_evaluate_cotton_plantation = { priority = 0 } } set_variable = cbob24 } if = { limit = { ec_evaluate_dye_plantation = { priority = 0 } } set_variable = cbob25 } if = { limit = { ec_evaluate_silk_plantation = { priority = 0 } } set_variable = cbob26 } if = { limit = { ec_evaluate_banana_plantation = { priority = 0 } } set_variable = cbob27 } if = { limit = { ec_evaluate_sugar_plantation = { priority = 0 } } set_variable = cbob28 } if = { limit = { ec_evaluate_tea_plantation = { priority = 0 } } set_variable = cbob29 } if = { limit = { ec_evaluate_coffee_plantation = { priority = 0 } } set_variable = cbob30 } if = { limit = { ec_evaluate_tobacco_plantation = { priority = 0 } } set_variable = cbob31 } if = { limit = { ec_evaluate_opium_plantation = { priority = 0 } } set_variable = cbob32 } if = { limit = { ec_evaluate_food_industry = { priority = 0 } } set_variable = cbob33 } if = { limit = { ec_evaluate_arts_academy = { priority = 0 } } set_variable = cbob34 } if = { limit = { ec_evaluate_textile_mills = { priority = 0 } } set_variable = cbob35 } if = { limit = { ec_evaluate_furniture_manufacturies = { priority = 0 } } set_variable = cbob36 } if = { limit = { ec_evaluate_glassworks = { priority = 0 } } set_variable = cbob37 } if = { limit = { ec_evaluate_tooling_workshops = { priority = 0 } } set_variable = cbob38 } if = { limit = { ec_evaluate_paper_mills = { priority = 0 } } set_variable = cbob39 } if = { limit = { ec_evaluate_chemical_plants = { priority = 0 } } set_variable = cbob40 } if = { limit = { ec_evaluate_synthetics_plants = { priority = 0 } } set_variable = cbob41 } if = { limit = { ec_evaluate_steel_mills = { priority = 0 } } set_variable = cbob42 } if = { limit = { ec_evaluate_motor_industry = { priority = 0 } } set_variable = cbob43 } if = { limit = { ec_evaluate_power_plant = { priority = 0 } } set_variable = cbob44 } if = { limit = { ec_evaluate_shipyards = { priority = 0 } } set_variable = cbob45 } if = { limit = { ec_evaluate_arms_industry = { priority = 0 } } set_variable = cbob46 } if = { limit = { ec_evaluate_munition_plants = { priority = 0 } } set_variable = cbob47 } if = { limit = { ec_evaluate_electrics_industry = { priority = 0 } } set_variable = cbob48 } if = { limit = { ec_evaluate_war_machine_industry = { priority = 0 } } set_variable = cbob49 } }
@@ -2513,11 +2904,11 @@ if = { limit = { ec_consider_munition_plants = yes } if = { limit = { NOT = { an
 if = { limit = { ec_consider_electrics_industry = yes } if = { limit = { NOT = { any_scope_building = { is_building_type = building_electrics_industry is_under_construction = yes } } } if = { limit = { ec_evaluate_electrics_industry = { priority = 1 } } set_variable = { name = cber48 value = 1 } } else_if = { limit = { ec_evaluate_electrics_industry = { priority = 2 } } set_variable = { name = cber48 value = 2 } } else_if = { limit = { ec_evaluate_electrics_industry = { priority = 3 } } set_variable = { name = cber48 value = 3 } } else_if = { limit = { ec_evaluate_electrics_industry = { priority = 4 } } set_variable = { name = cber48 value = 4 } } else_if = { limit = { ec_evaluate_electrics_industry = { priority = 5 } } set_variable = { name = cber48 value = 5 } } else_if = { limit = { ec_evaluate_electrics_industry = { priority = 6 } } set_variable = { name = cber48 value = 6 } } else_if = { limit = { has_variable_list = ec_suitable_states_1 variable_list_size = { name = ec_suitable_states_1 value > 0 } } if = { limit = { ec_evaluate_electrics_industry = { priority = 7 } } set_variable = { name = cber48 value = 7 } } else_if = { limit = { ec_evaluate_electrics_industry = { priority = 8 } } set_variable = { name = cber48 value = 8 } } else_if = { limit = { ec_evaluate_electrics_industry = { priority = 9 } } set_variable = { name = cber48 value = 9 } } else_if = { limit = { ec_evaluate_electrics_industry = { priority = 10 } } set_variable = { name = cber48 value = 10 } } else_if = { limit = { ec_evaluate_electrics_industry = { priority = 11 } } set_variable = { name = cber48 value = 11 } } else_if = { limit = { ec_evaluate_electrics_industry = { priority = 12 } } set_variable = { name = cber48 value = 12 } } else_if = { limit = { ec_evaluate_electrics_industry = { priority = 13 } } set_variable = { name = cber48 value = 13 } } else_if = { limit = { ec_evaluate_electrics_industry = { priority = 14 } } set_variable = { name = cber48 value = 14 } } else_if = { limit = { ec_evaluate_electrics_industry = { priority = 15 } } set_variable = { name = cber48 value = 15 } } else_if = { limit = { ec_evaluate_electrics_industry = { priority = 16 } } set_variable = { name = cber48 value = 16 } } else_if = { limit = { ec_evaluate_electrics_industry = { priority = 17 } } set_variable = { name = cber48 value = 17 } } else_if = { limit = { ec_evaluate_electrics_industry = { priority = 18 } } set_variable = { name = cber48 value = 18 } } } } } 
 if = { limit = { ec_consider_war_machine_industry = yes } if = { limit = { NOT = { any_scope_building = { is_building_type = building_war_machine_industry is_under_construction = yes } } } if = { limit = { ec_evaluate_war_machine_industry = { priority = 1 } } set_variable = { name = cber49 value = 1 } } else_if = { limit = { ec_evaluate_war_machine_industry = { priority = 2 } } set_variable = { name = cber49 value = 2 } } else_if = { limit = { ec_evaluate_war_machine_industry = { priority = 3 } } set_variable = { name = cber49 value = 3 } } else_if = { limit = { ec_evaluate_war_machine_industry = { priority = 4 } } set_variable = { name = cber49 value = 4 } } else_if = { limit = { ec_evaluate_war_machine_industry = { priority = 5 } } set_variable = { name = cber49 value = 5 } } else_if = { limit = { ec_evaluate_war_machine_industry = { priority = 6 } } set_variable = { name = cber49 value = 6 } } else_if = { limit = { has_variable_list = ec_suitable_states_1 variable_list_size = { name = ec_suitable_states_1 value > 0 } } if = { limit = { ec_evaluate_war_machine_industry = { priority = 7 } } set_variable = { name = cber49 value = 7 } } else_if = { limit = { ec_evaluate_war_machine_industry = { priority = 8 } } set_variable = { name = cber49 value = 8 } } else_if = { limit = { ec_evaluate_war_machine_industry = { priority = 9 } } set_variable = { name = cber49 value = 9 } } else_if = { limit = { ec_evaluate_war_machine_industry = { priority = 10 } } set_variable = { name = cber49 value = 10 } } else_if = { limit = { ec_evaluate_war_machine_industry = { priority = 11 } } set_variable = { name = cber49 value = 11 } } else_if = { limit = { ec_evaluate_war_machine_industry = { priority = 12 } } set_variable = { name = cber49 value = 12 } } else_if = { limit = { ec_evaluate_war_machine_industry = { priority = 13 } } set_variable = { name = cber49 value = 13 } } else_if = { limit = { ec_evaluate_war_machine_industry = { priority = 14 } } set_variable = { name = cber49 value = 14 } } else_if = { limit = { ec_evaluate_war_machine_industry = { priority = 15 } } set_variable = { name = cber49 value = 15 } } else_if = { limit = { ec_evaluate_war_machine_industry = { priority = 16 } } set_variable = { name = cber49 value = 16 } } else_if = { limit = { ec_evaluate_war_machine_industry = { priority = 17 } } set_variable = { name = cber49 value = 17 } } else_if = { limit = { ec_evaluate_war_machine_industry = { priority = 18 } } set_variable = { name = cber49 value = 18 } } } } } 
 
-every_scope_state = { limit = { has_variable = ec_available_workforce }
+every_scope_state = { limit = { has_variable = ec_available_workforce state_region = { has_variable = ecpar } } ec_decipher_ecpar = yes
 if = { limit = { root = { has_variable = cber1 } OR = { AND = { root = { var:cber1 <= 11 } ec_check_if_state_is_suitable = { criteria = 1 } } AND = { root = { var:cber1 > 11 } ec_check_if_state_is_suitable = { criteria = 2 } } } } if = { limit = { ec_allocate_government_administration = { priority = 1 } } root = { add_to_variable_list = { name = cbb1p1 target = prev } } } else_if = { limit = { ec_allocate_government_administration = { priority = 2 } } root = { add_to_variable_list = { name = cbb1p2 target = prev } } } else_if = { limit = { ec_allocate_government_administration = { priority = 3 } } root = { add_to_variable_list = { name = cbb1p3 target = prev } } } else_if = { limit = { ec_allocate_government_administration = { priority = 4 } } root = { add_to_variable_list = { name = cbb1p4 target = prev } } } else_if = { limit = { ec_allocate_government_administration = { priority = 5 } } root = { add_to_variable_list = { name = cbb1p5 target = prev } } } else_if = { limit = { ec_allocate_government_administration = { priority = 6 } } root = { add_to_variable_list = { name = cbb1p6 target = prev } } } } 
 if = { limit = { root = { has_variable = cber2 } OR = { AND = { root = { var:cber2 <= 6 } ec_check_if_state_is_suitable = { criteria = 1 } } AND = { root = { var:cber2 > 6 } ec_check_if_state_is_suitable = { criteria = 2 } } } } if = { limit = { ec_allocate_construction_sector = { priority = 1 } } root = { add_to_variable_list = { name = cbb2p1 target = prev } } } } 
 if = { limit = { root = { has_variable = cber3 } OR = { AND = { root = { var:cber3 <= 11 } ec_check_if_state_is_suitable = { criteria = 1 } } AND = { root = { var:cber3 > 11 } ec_check_if_state_is_suitable = { criteria = 2 } } } } if = { limit = { ec_allocate_university = { priority = 1 } } root = { add_to_variable_list = { name = cbb3p1 target = prev } } } } 
-if = { limit = { root = { has_variable = cber4 } } root = { if = { limit = { NOT = { has_variable = cbb4c } } set_variable = { name = cbb4c value = 0 } } } if = { limit = { any_scope_building = { is_building_type = building_railway is_under_construction = yes } } root = { change_variable = { name = cbb4c add = 1 } set_variable = { name = cbcls value = 4 } set_variable = { name = cbcsb value = var:cber4 } if = { limit = { var:cbb4c >= ec_building_limit_adjusted } remove_variable = cbb4c remove_variable = cber4 clear_variable_list = cbb4p1 clear_variable_list = cbb4p2 clear_variable_list = cbb4p3 clear_variable_list = cbb4p4 clear_variable_list = cbb4p5 clear_variable_list = cbb4p6 } remove_variable = cbcls remove_variable = cbcsb } } else = { if = { limit = { ec_allocate_railway = { priority = 1 } } root = { add_to_variable_list = { name = cbb4p1 target = prev } } } else_if = { limit = { ec_allocate_railway = { priority = 2 } } root = { add_to_variable_list = { name = cbb4p2 target = prev } } } else_if = { limit = { ec_allocate_railway = { priority = 3 } } root = { add_to_variable_list = { name = cbb4p3 target = prev } } } else_if = { limit = { ec_allocate_railway = { priority = 4 } } root = { add_to_variable_list = { name = cbb4p4 target = prev } } } else_if = { limit = { ec_allocate_railway = { priority = 5 } } root = { add_to_variable_list = { name = cbb4p5 target = prev } } } else_if = { limit = { ec_allocate_railway = { priority = 6 } } root = { add_to_variable_list = { name = cbb4p6 target = prev } } } } } 
+if = { limit = { root = { has_variable = cber4 } } root = { if = { limit = { NOT = { has_variable = cbb4c } } set_variable = { name = cbb4c value = 0 } } } if = { limit = { any_scope_building = { is_building_type = building_railway is_under_construction = yes } } root = { change_variable = { name = cbb4c add = 1 } set_variable = { name = cbcls value = 4 } set_variable = { name = cbcsb value = var:cber4 } if = { limit = { var:cbb4c >= ec_building_limit_adjusted } remove_variable = cbb4c remove_variable = cber4 clear_variable_list = cbb4p1 clear_variable_list = cbb4p2 clear_variable_list = cbb4p3 clear_variable_list = cbb4p4 clear_variable_list = cbb4p5 clear_variable_list = cbb4p6 clear_variable_list = cbb4p7 } remove_variable = cbcls remove_variable = cbcsb } } else = { if = { limit = { ec_allocate_railway = { priority = 1 } } root = { add_to_variable_list = { name = cbb4p1 target = prev } } } else_if = { limit = { ec_allocate_railway = { priority = 2 } } root = { add_to_variable_list = { name = cbb4p2 target = prev } } } else_if = { limit = { ec_allocate_railway = { priority = 3 } } root = { add_to_variable_list = { name = cbb4p3 target = prev } } } else_if = { limit = { ec_allocate_railway = { priority = 4 } } root = { add_to_variable_list = { name = cbb4p4 target = prev } } } else_if = { limit = { ec_allocate_railway = { priority = 5 } } root = { add_to_variable_list = { name = cbb4p5 target = prev } } } else_if = { limit = { ec_allocate_railway = { priority = 6 } } root = { add_to_variable_list = { name = cbb4p6 target = prev } } } else_if = { limit = { ec_allocate_railway = { priority = 7 } } root = { add_to_variable_list = { name = cbb4p7 target = prev } } } } } 
 if = { limit = { root = { has_variable = cber5 } } root = { if = { limit = { NOT = { has_variable = cbb5c } } set_variable = { name = cbb5c value = 0 } } } if = { limit = { any_scope_building = { is_building_type = building_port is_under_construction = yes } } root = { change_variable = { name = cbb5c add = 1 } set_variable = { name = cbcls value = 4 } set_variable = { name = cbcsb value = var:cber5 } if = { limit = { var:cbb5c >= ec_building_limit_adjusted } remove_variable = cbb5c remove_variable = cber5 clear_variable_list = cbb5p1 clear_variable_list = cbb5p2 clear_variable_list = cbb5p3 } remove_variable = cbcls remove_variable = cbcsb } } else = { if = { limit = { ec_allocate_port = { priority = 1 } } root = { add_to_variable_list = { name = cbb5p1 target = prev } } } else_if = { limit = { ec_allocate_port = { priority = 2 } } root = { add_to_variable_list = { name = cbb5p2 target = prev } } } else_if = { limit = { ec_allocate_port = { priority = 3 } } root = { add_to_variable_list = { name = cbb5p3 target = prev } } } } } 
 if = { limit = { root = { has_variable = cber6 } OR = { AND = { root = { var:cber6 <= 11 } ec_check_if_state_is_suitable = { criteria = 1 } } AND = { root = { var:cber6 > 11 } ec_check_if_state_is_suitable = { criteria = 2 } } } } if = { limit = { ec_allocate_barracks = { priority = 1 } } root = { add_to_variable_list = { name = cbb6p1 target = prev } } } else_if = { limit = { ec_allocate_barracks = { priority = 2 } } root = { add_to_variable_list = { name = cbb6p2 target = prev } } } } 
 if = { limit = { root = { has_variable = cber7 } OR = { AND = { root = { var:cber7 <= 11 } ec_check_if_state_is_suitable = { criteria = 1 } } AND = { root = { var:cber7 > 11 } ec_check_if_state_is_suitable = { criteria = 2 } } } } if = { limit = { ec_allocate_naval_base = { priority = 1 } } root = { add_to_variable_list = { name = cbb7p1 target = prev } } } else_if = { limit = { ec_allocate_naval_base = { priority = 2 } } root = { add_to_variable_list = { name = cbb7p2 target = prev } } } } 
@@ -2563,12 +2954,12 @@ if = { limit = { root = { has_variable = cber46 } OR = { AND = { root = { var:cb
 if = { limit = { root = { has_variable = cber47 } OR = { AND = { root = { var:cber47 <= 6 } ec_check_if_state_is_suitable = { criteria = 1 } } AND = { root = { var:cber47 > 6 } ec_check_if_state_is_suitable = { criteria = 2 } } } } if = { limit = { ec_allocate_munition_plants = { priority = 1 } } root = { add_to_variable_list = { name = cbb47p1 target = prev } } } } 
 if = { limit = { root = { has_variable = cber48 } OR = { AND = { root = { var:cber48 <= 6 } ec_check_if_state_is_suitable = { criteria = 1 } } AND = { root = { var:cber48 > 6 } ec_check_if_state_is_suitable = { criteria = 2 } } } } if = { limit = { ec_allocate_electrics_industry = { priority = 1 } } root = { add_to_variable_list = { name = cbb48p1 target = prev } } } } 
 if = { limit = { root = { has_variable = cber49 } OR = { AND = { root = { var:cber49 <= 6 } ec_check_if_state_is_suitable = { criteria = 1 } } AND = { root = { var:cber49 > 6 } ec_check_if_state_is_suitable = { criteria = 2 } } } } if = { limit = { ec_allocate_war_machine_industry = { priority = 1 } } root = { add_to_variable_list = { name = cbb49p1 target = prev } } } } 
-}
+remove_variable = ecpar1 remove_variable = ecpar2 remove_variable = ecpar3 remove_variable = ecpar4 remove_variable = ecpar5 remove_variable = ecpar6 }
 
 if = { limit = { OR = { AND = { has_variable_list = cbb1p1 variable_list_size = { name = cbb1p1 value > 0 } } AND = { has_variable_list = cbb1p2 variable_list_size = { name = cbb1p2 value > 0 } } AND = { has_variable_list = cbb1p3 variable_list_size = { name = cbb1p3 value > 0 } } AND = { has_variable_list = cbb1p4 variable_list_size = { name = cbb1p4 value > 0 } } AND = { has_variable_list = cbb1p5 variable_list_size = { name = cbb1p5 value > 0 } } AND = { has_variable_list = cbb1p6 variable_list_size = { name = cbb1p6 value > 0 } } } } random_in_global_list = { variable = cbiol limit = { var:cbiob = 1 } save_scope_as = ec_current_building } ec_add_building_to_priority_list = { cber = cber1 } clear_saved_scope = ec_current_building } 
 if = { limit = { OR = { AND = { has_variable_list = cbb2p1 variable_list_size = { name = cbb2p1 value > 0 } } } } random_in_global_list = { variable = cbiol limit = { var:cbiob = 2 } save_scope_as = ec_current_building } ec_add_building_to_priority_list = { cber = cber2 } clear_saved_scope = ec_current_building } 
 if = { limit = { OR = { AND = { has_variable_list = cbb3p1 variable_list_size = { name = cbb3p1 value > 0 } } } } random_in_global_list = { variable = cbiol limit = { var:cbiob = 3 } save_scope_as = ec_current_building } ec_add_building_to_priority_list = { cber = cber3 } clear_saved_scope = ec_current_building } 
-if = { limit = { OR = { AND = { has_variable_list = cbb4p1 variable_list_size = { name = cbb4p1 value > 0 } } AND = { has_variable_list = cbb4p2 variable_list_size = { name = cbb4p2 value > 0 } } AND = { has_variable_list = cbb4p3 variable_list_size = { name = cbb4p3 value > 0 } } AND = { has_variable_list = cbb4p4 variable_list_size = { name = cbb4p4 value > 0 } } AND = { has_variable_list = cbb4p5 variable_list_size = { name = cbb4p5 value > 0 } } AND = { has_variable_list = cbb4p6 variable_list_size = { name = cbb4p6 value > 0 } } } } random_in_global_list = { variable = cbiol limit = { var:cbiob = 4 } save_scope_as = ec_current_building } ec_add_building_to_priority_list = { cber = cber4 } clear_saved_scope = ec_current_building } 
+if = { limit = { OR = { AND = { has_variable_list = cbb4p1 variable_list_size = { name = cbb4p1 value > 0 } } AND = { has_variable_list = cbb4p2 variable_list_size = { name = cbb4p2 value > 0 } } AND = { has_variable_list = cbb4p3 variable_list_size = { name = cbb4p3 value > 0 } } AND = { has_variable_list = cbb4p4 variable_list_size = { name = cbb4p4 value > 0 } } AND = { has_variable_list = cbb4p5 variable_list_size = { name = cbb4p5 value > 0 } } AND = { has_variable_list = cbb4p6 variable_list_size = { name = cbb4p6 value > 0 } } AND = { has_variable_list = cbb4p7 variable_list_size = { name = cbb4p7 value > 0 } } } } random_in_global_list = { variable = cbiol limit = { var:cbiob = 4 } save_scope_as = ec_current_building } ec_add_building_to_priority_list = { cber = cber4 } clear_saved_scope = ec_current_building } 
 if = { limit = { OR = { AND = { has_variable_list = cbb5p1 variable_list_size = { name = cbb5p1 value > 0 } } AND = { has_variable_list = cbb5p2 variable_list_size = { name = cbb5p2 value > 0 } } AND = { has_variable_list = cbb5p3 variable_list_size = { name = cbb5p3 value > 0 } } } } random_in_global_list = { variable = cbiol limit = { var:cbiob = 5 } save_scope_as = ec_current_building } ec_add_building_to_priority_list = { cber = cber5 } clear_saved_scope = ec_current_building } 
 if = { limit = { OR = { AND = { has_variable_list = cbb6p1 variable_list_size = { name = cbb6p1 value > 0 } } AND = { has_variable_list = cbb6p2 variable_list_size = { name = cbb6p2 value > 0 } } } } random_in_global_list = { variable = cbiol limit = { var:cbiob = 6 } save_scope_as = ec_current_building } ec_add_building_to_priority_list = { cber = cber6 } clear_saved_scope = ec_current_building } 
 if = { limit = { OR = { AND = { has_variable_list = cbb7p1 variable_list_size = { name = cbb7p1 value > 0 } } AND = { has_variable_list = cbb7p2 variable_list_size = { name = cbb7p2 value > 0 } } } } random_in_global_list = { variable = cbiol limit = { var:cbiob = 7 } save_scope_as = ec_current_building } ec_add_building_to_priority_list = { cber = cber7 } clear_saved_scope = ec_current_building } 
@@ -2646,7 +3037,7 @@ ec_start_building_construction = {
 if = { limit = { var:cbrbi = 1 } if = { limit = { has_variable_list = cbb1p1 variable_list_size = { name = cbb1p1 value > 0 } } every_in_list = { variable = cbb1p1 if = { limit = { is_incorporated = yes ec_state_has_free_workforce = yes } root = { add_to_variable_list = { name = cbb1o1 target = prev } } } else_if = { limit = { is_incorporated = no ec_state_has_free_workforce = yes } root = { add_to_variable_list = { name = cbb1o2 target = prev } } } else_if = { limit = { is_incorporated = yes ec_state_has_free_workforce = no } root = { add_to_variable_list = { name = cbb1o3 target = prev } } } else_if = { limit = { is_incorporated = no ec_state_has_free_workforce = no } root = { add_to_variable_list = { name = cbb1o4 target = prev } } } } } if = { limit = { has_variable_list = cbb1p2 variable_list_size = { name = cbb1p2 value > 0 } } every_in_list = { variable = cbb1p2 if = { limit = { is_incorporated = yes ec_state_has_free_workforce = yes } root = { add_to_variable_list = { name = cbb1o5 target = prev } } } else_if = { limit = { is_incorporated = no ec_state_has_free_workforce = yes } root = { add_to_variable_list = { name = cbb1o6 target = prev } } } else_if = { limit = { is_incorporated = yes ec_state_has_free_workforce = no } root = { add_to_variable_list = { name = cbb1o7 target = prev } } } else_if = { limit = { is_incorporated = no ec_state_has_free_workforce = no } root = { add_to_variable_list = { name = cbb1o8 target = prev } } } } } if = { limit = { has_variable_list = cbb1p3 variable_list_size = { name = cbb1p3 value > 0 } } every_in_list = { variable = cbb1p3 if = { limit = { is_incorporated = yes ec_state_has_free_workforce = yes } root = { add_to_variable_list = { name = cbb1o9 target = prev } } } else_if = { limit = { is_incorporated = no ec_state_has_free_workforce = yes } root = { add_to_variable_list = { name = cbb1o10 target = prev } } } else_if = { limit = { is_incorporated = yes ec_state_has_free_workforce = no } root = { add_to_variable_list = { name = cbb1o11 target = prev } } } else_if = { limit = { is_incorporated = no ec_state_has_free_workforce = no } root = { add_to_variable_list = { name = cbb1o12 target = prev } } } } } if = { limit = { has_variable_list = cbb1p4 variable_list_size = { name = cbb1p4 value > 0 } } every_in_list = { variable = cbb1p4 if = { limit = { is_incorporated = yes ec_state_has_free_workforce = yes } root = { add_to_variable_list = { name = cbb1o13 target = prev } } } else_if = { limit = { is_incorporated = no ec_state_has_free_workforce = yes } root = { add_to_variable_list = { name = cbb1o14 target = prev } } } else_if = { limit = { is_incorporated = yes ec_state_has_free_workforce = no } root = { add_to_variable_list = { name = cbb1o15 target = prev } } } else_if = { limit = { is_incorporated = no ec_state_has_free_workforce = no } root = { add_to_variable_list = { name = cbb1o16 target = prev } } } } } if = { limit = { has_variable_list = cbb1p5 variable_list_size = { name = cbb1p5 value > 0 } } every_in_list = { variable = cbb1p5 if = { limit = { is_incorporated = yes ec_state_has_free_workforce = yes } root = { add_to_variable_list = { name = cbb1o17 target = prev } } } else_if = { limit = { is_incorporated = no ec_state_has_free_workforce = yes } root = { add_to_variable_list = { name = cbb1o18 target = prev } } } else_if = { limit = { is_incorporated = yes ec_state_has_free_workforce = no } root = { add_to_variable_list = { name = cbb1o19 target = prev } } } else_if = { limit = { is_incorporated = no ec_state_has_free_workforce = no } root = { add_to_variable_list = { name = cbb1o20 target = prev } } } } } if = { limit = { has_variable_list = cbb1p6 variable_list_size = { name = cbb1p6 value > 0 } } every_in_list = { variable = cbb1p6 if = { limit = { is_incorporated = yes ec_state_has_free_workforce = yes } root = { add_to_variable_list = { name = cbb1o21 target = prev } } } else_if = { limit = { is_incorporated = no ec_state_has_free_workforce = yes } root = { add_to_variable_list = { name = cbb1o22 target = prev } } } else_if = { limit = { is_incorporated = yes ec_state_has_free_workforce = no } root = { add_to_variable_list = { name = cbb1o23 target = prev } } } else_if = { limit = { is_incorporated = no ec_state_has_free_workforce = no } root = { add_to_variable_list = { name = cbb1o24 target = prev } } } } } if = { limit = { NOT = { has_variable = cbb1c } } set_variable = { name = cbb1c value = 0 } } set_variable = { name = cbcls value = 4 } set_variable = { name = cbcsb value = var:cber1 } if = { limit = { has_variable_list = cbb1o1 variable_list_size = { name = cbb1o1 value > 0 } } cbs1c = { states = cbb1o1 } } if = { limit = { var:cbb1c < ec_building_limit_adjusted has_variable_list = cbb1o2 variable_list_size = { name = cbb1o2 value > 0 } } cbs1c = { states = cbb1o2 } } if = { limit = { var:cbb1c < ec_building_limit_adjusted has_variable_list = cbb1o3 variable_list_size = { name = cbb1o3 value > 0 } } cbs1c = { states = cbb1o3 } } if = { limit = { var:cbb1c < ec_building_limit_adjusted has_variable_list = cbb1o4 variable_list_size = { name = cbb1o4 value > 0 } } cbs1c = { states = cbb1o4 } } if = { limit = { var:cbb1c < ec_building_limit_adjusted has_variable_list = cbb1o5 variable_list_size = { name = cbb1o5 value > 0 } } cbs1c = { states = cbb1o5 } } if = { limit = { var:cbb1c < ec_building_limit_adjusted has_variable_list = cbb1o6 variable_list_size = { name = cbb1o6 value > 0 } } cbs1c = { states = cbb1o6 } } if = { limit = { var:cbb1c < ec_building_limit_adjusted has_variable_list = cbb1o7 variable_list_size = { name = cbb1o7 value > 0 } } cbs1c = { states = cbb1o7 } } if = { limit = { var:cbb1c < ec_building_limit_adjusted has_variable_list = cbb1o8 variable_list_size = { name = cbb1o8 value > 0 } } cbs1c = { states = cbb1o8 } } if = { limit = { var:cbb1c < ec_building_limit_adjusted has_variable_list = cbb1o9 variable_list_size = { name = cbb1o9 value > 0 } } cbs1c = { states = cbb1o9 } } if = { limit = { var:cbb1c < ec_building_limit_adjusted has_variable_list = cbb1o10 variable_list_size = { name = cbb1o10 value > 0 } } cbs1c = { states = cbb1o10 } } if = { limit = { var:cbb1c < ec_building_limit_adjusted has_variable_list = cbb1o11 variable_list_size = { name = cbb1o11 value > 0 } } cbs1c = { states = cbb1o11 } } if = { limit = { var:cbb1c < ec_building_limit_adjusted has_variable_list = cbb1o12 variable_list_size = { name = cbb1o12 value > 0 } } cbs1c = { states = cbb1o12 } } if = { limit = { var:cbb1c < ec_building_limit_adjusted has_variable_list = cbb1o13 variable_list_size = { name = cbb1o13 value > 0 } } cbs1c = { states = cbb1o13 } } if = { limit = { var:cbb1c < ec_building_limit_adjusted has_variable_list = cbb1o14 variable_list_size = { name = cbb1o14 value > 0 } } cbs1c = { states = cbb1o14 } } if = { limit = { var:cbb1c < ec_building_limit_adjusted has_variable_list = cbb1o15 variable_list_size = { name = cbb1o15 value > 0 } } cbs1c = { states = cbb1o15 } } if = { limit = { var:cbb1c < ec_building_limit_adjusted has_variable_list = cbb1o16 variable_list_size = { name = cbb1o16 value > 0 } } cbs1c = { states = cbb1o16 } } if = { limit = { var:cbb1c < ec_building_limit_adjusted has_variable_list = cbb1o17 variable_list_size = { name = cbb1o17 value > 0 } } cbs1c = { states = cbb1o17 } } if = { limit = { var:cbb1c < ec_building_limit_adjusted has_variable_list = cbb1o18 variable_list_size = { name = cbb1o18 value > 0 } } cbs1c = { states = cbb1o18 } } if = { limit = { var:cbb1c < ec_building_limit_adjusted has_variable_list = cbb1o19 variable_list_size = { name = cbb1o19 value > 0 } } cbs1c = { states = cbb1o19 } } if = { limit = { var:cbb1c < ec_building_limit_adjusted has_variable_list = cbb1o20 variable_list_size = { name = cbb1o20 value > 0 } } cbs1c = { states = cbb1o20 } } if = { limit = { var:cbb1c < ec_building_limit_adjusted has_variable_list = cbb1o21 variable_list_size = { name = cbb1o21 value > 0 } } cbs1c = { states = cbb1o21 } } if = { limit = { var:cbb1c < ec_building_limit_adjusted has_variable_list = cbb1o22 variable_list_size = { name = cbb1o22 value > 0 } } cbs1c = { states = cbb1o22 } } if = { limit = { var:cbb1c < ec_building_limit_adjusted has_variable_list = cbb1o23 variable_list_size = { name = cbb1o23 value > 0 } } cbs1c = { states = cbb1o23 } } if = { limit = { var:cbb1c < ec_building_limit_adjusted has_variable_list = cbb1o24 variable_list_size = { name = cbb1o24 value > 0 } } cbs1c = { states = cbb1o24 } } remove_variable = cbcls remove_variable = cbcsb clear_variable_list = cbb1o1 clear_variable_list = cbb1o2 clear_variable_list = cbb1o3 clear_variable_list = cbb1o4 clear_variable_list = cbb1o5 clear_variable_list = cbb1o6 clear_variable_list = cbb1o7 clear_variable_list = cbb1o8 clear_variable_list = cbb1o9 clear_variable_list = cbb1o10 clear_variable_list = cbb1o11 clear_variable_list = cbb1o12 clear_variable_list = cbb1o13 clear_variable_list = cbb1o14 clear_variable_list = cbb1o15 clear_variable_list = cbb1o16 clear_variable_list = cbb1o17 clear_variable_list = cbb1o18 clear_variable_list = cbb1o19 clear_variable_list = cbb1o20 clear_variable_list = cbb1o21 clear_variable_list = cbb1o22 clear_variable_list = cbb1o23 clear_variable_list = cbb1o24 }
 else_if = { limit = { var:cbrbi = 2 } if = { limit = { has_variable_list = cbb2p1 variable_list_size = { name = cbb2p1 value > 0 } } every_in_list = { variable = cbb2p1 if = { limit = { is_incorporated = yes ec_state_has_free_workforce = yes } root = { add_to_variable_list = { name = cbb2o1 target = prev } } } else_if = { limit = { is_incorporated = no ec_state_has_free_workforce = yes } root = { add_to_variable_list = { name = cbb2o2 target = prev } } } else_if = { limit = { is_incorporated = yes ec_state_has_free_workforce = no } root = { add_to_variable_list = { name = cbb2o3 target = prev } } } else_if = { limit = { is_incorporated = no ec_state_has_free_workforce = no } root = { add_to_variable_list = { name = cbb2o4 target = prev } } } } } if = { limit = { NOT = { has_variable = cbb2c } } set_variable = { name = cbb2c value = 0 } } set_variable = { name = cbcls value = 4 } set_variable = { name = cbcsb value = var:cber2 } if = { limit = { has_variable_list = cbb2o1 variable_list_size = { name = cbb2o1 value > 0 } } cbs2c = { states = cbb2o1 } } if = { limit = { var:cbb2c < ec_building_limit_adjusted has_variable_list = cbb2o2 variable_list_size = { name = cbb2o2 value > 0 } } cbs2c = { states = cbb2o2 } } if = { limit = { var:cbb2c < ec_building_limit_adjusted has_variable_list = cbb2o3 variable_list_size = { name = cbb2o3 value > 0 } } cbs2c = { states = cbb2o3 } } if = { limit = { var:cbb2c < ec_building_limit_adjusted has_variable_list = cbb2o4 variable_list_size = { name = cbb2o4 value > 0 } } cbs2c = { states = cbb2o4 } } remove_variable = cbcls remove_variable = cbcsb clear_variable_list = cbb2o1 clear_variable_list = cbb2o2 clear_variable_list = cbb2o3 clear_variable_list = cbb2o4 }
 else_if = { limit = { var:cbrbi = 3 } if = { limit = { has_variable_list = cbb3p1 variable_list_size = { name = cbb3p1 value > 0 } } every_in_list = { variable = cbb3p1 if = { limit = { is_incorporated = yes ec_state_has_free_workforce = yes } root = { add_to_variable_list = { name = cbb3o1 target = prev } } } else_if = { limit = { is_incorporated = no ec_state_has_free_workforce = yes } root = { add_to_variable_list = { name = cbb3o2 target = prev } } } else_if = { limit = { is_incorporated = yes ec_state_has_free_workforce = no } root = { add_to_variable_list = { name = cbb3o3 target = prev } } } else_if = { limit = { is_incorporated = no ec_state_has_free_workforce = no } root = { add_to_variable_list = { name = cbb3o4 target = prev } } } } } if = { limit = { NOT = { has_variable = cbb3c } } set_variable = { name = cbb3c value = 0 } } set_variable = { name = cbcls value = 4 } set_variable = { name = cbcsb value = var:cber3 } if = { limit = { has_variable_list = cbb3o1 variable_list_size = { name = cbb3o1 value > 0 } } cbs3c = { states = cbb3o1 } } if = { limit = { var:cbb3c < ec_building_limit_adjusted has_variable_list = cbb3o2 variable_list_size = { name = cbb3o2 value > 0 } } cbs3c = { states = cbb3o2 } } if = { limit = { var:cbb3c < ec_building_limit_adjusted has_variable_list = cbb3o3 variable_list_size = { name = cbb3o3 value > 0 } } cbs3c = { states = cbb3o3 } } if = { limit = { var:cbb3c < ec_building_limit_adjusted has_variable_list = cbb3o4 variable_list_size = { name = cbb3o4 value > 0 } } cbs3c = { states = cbb3o4 } } remove_variable = cbcls remove_variable = cbcsb clear_variable_list = cbb3o1 clear_variable_list = cbb3o2 clear_variable_list = cbb3o3 clear_variable_list = cbb3o4 }
-else_if = { limit = { var:cbrbi = 4 } set_variable = { name = cbcls value = 4 } set_variable = { name = cbcsb value = var:cber4 } if = { limit = { has_variable_list = cbb4p1 variable_list_size = { name = cbb4p1 value > 0 } } cbs4c = { states = cbb4p1 } } if = { limit = { var:cbb4c < ec_building_limit_adjusted has_variable_list = cbb4p2 variable_list_size = { name = cbb4p2 value > 0 } } cbs4c = { states = cbb4p2 } } if = { limit = { var:cbb4c < ec_building_limit_adjusted has_variable_list = cbb4p3 variable_list_size = { name = cbb4p3 value > 0 } } cbs4c = { states = cbb4p3 } } if = { limit = { var:cbb4c < ec_building_limit_adjusted has_variable_list = cbb4p4 variable_list_size = { name = cbb4p4 value > 0 } } cbs4c = { states = cbb4p4 } } if = { limit = { var:cbb4c < ec_building_limit_adjusted has_variable_list = cbb4p5 variable_list_size = { name = cbb4p5 value > 0 } } cbs4c = { states = cbb4p5 } } if = { limit = { var:cbb4c < ec_building_limit_adjusted has_variable_list = cbb4p6 variable_list_size = { name = cbb4p6 value > 0 } } cbs4c = { states = cbb4p6 } } remove_variable = cbcls remove_variable = cbcsb }
+else_if = { limit = { var:cbrbi = 4 } set_variable = { name = cbcls value = 4 } set_variable = { name = cbcsb value = var:cber4 } if = { limit = { has_variable_list = cbb4p1 variable_list_size = { name = cbb4p1 value > 0 } } cbs4c = { states = cbb4p1 } } if = { limit = { var:cbb4c < ec_building_limit_adjusted has_variable_list = cbb4p2 variable_list_size = { name = cbb4p2 value > 0 } } cbs4c = { states = cbb4p2 } } if = { limit = { var:cbb4c < ec_building_limit_adjusted has_variable_list = cbb4p3 variable_list_size = { name = cbb4p3 value > 0 } } cbs4c = { states = cbb4p3 } } if = { limit = { var:cbb4c < ec_building_limit_adjusted has_variable_list = cbb4p4 variable_list_size = { name = cbb4p4 value > 0 } } cbs4c = { states = cbb4p4 } } if = { limit = { var:cbb4c < ec_building_limit_adjusted has_variable_list = cbb4p5 variable_list_size = { name = cbb4p5 value > 0 } } cbs4c = { states = cbb4p5 } } if = { limit = { var:cbb4c < ec_building_limit_adjusted has_variable_list = cbb4p6 variable_list_size = { name = cbb4p6 value > 0 } } cbs4c = { states = cbb4p6 } } if = { limit = { var:cbb4c < ec_building_limit_adjusted has_variable_list = cbb4p7 variable_list_size = { name = cbb4p7 value > 0 } } cbs4c = { states = cbb4p7 } } remove_variable = cbcls remove_variable = cbcsb }
 else_if = { limit = { var:cbrbi = 5 } set_variable = { name = cbcls value = 4 } set_variable = { name = cbcsb value = var:cber5 } if = { limit = { has_variable_list = cbb5p1 variable_list_size = { name = cbb5p1 value > 0 } } cbs5c = { states = cbb5p1 } } if = { limit = { var:cbb5c < ec_building_limit_adjusted has_variable_list = cbb5p2 variable_list_size = { name = cbb5p2 value > 0 } } cbs5c = { states = cbb5p2 } } if = { limit = { var:cbb5c < ec_building_limit_adjusted has_variable_list = cbb5p3 variable_list_size = { name = cbb5p3 value > 0 } } cbs5c = { states = cbb5p3 } } remove_variable = cbcls remove_variable = cbcsb }
 else_if = { limit = { var:cbrbi = 6 } if = { limit = { NOT = { has_variable = cbb6c } } set_variable = { name = cbb6c value = 0 } } set_variable = { name = cbcls value = 1 } set_variable = { name = cbcsb value = var:cber6 } if = { limit = { has_variable_list = cbb6p1 variable_list_size = { name = cbb6p1 value > 0 } } cbs6c = { states = cbb6p1 } } if = { limit = { var:cbb6c < ec_building_limit_adjusted has_variable_list = cbb6p2 variable_list_size = { name = cbb6p2 value > 0 } } cbs6c = { states = cbb6p2 } } remove_variable = cbcls remove_variable = cbcsb }
 else_if = { limit = { var:cbrbi = 7 } if = { limit = { NOT = { has_variable = cbb7c } } set_variable = { name = cbb7c value = 0 } } set_variable = { name = cbcls value = 4 } set_variable = { name = cbcsb value = var:cber7 } if = { limit = { has_variable_list = cbb7p1 variable_list_size = { name = cbb7p1 value > 0 } } cbs7c = { states = cbb7p1 } } if = { limit = { var:cbb7c < ec_building_limit_adjusted has_variable_list = cbb7p2 variable_list_size = { name = cbb7p2 value > 0 } } cbs7c = { states = cbb7p2 } } remove_variable = cbcls remove_variable = cbcsb }
@@ -2744,4 +3135,4 @@ cbs47c = { every_in_list = { variable = $states$ root = { add_to_variable_list =
 cbs48c = { every_in_list = { variable = $states$ root = { add_to_variable_list = { name = cbcpl target = prev } } if = { limit = { OR = { NOT = { has_building = building_electrics_industry } any_scope_building = { is_building_type = building_electrics_industry level <= 0 is_under_construction = no } } } set_variable = { name = cbcbl value = 0 } } else = { save_scope_as = ec_current_state random_scope_building = { limit = { is_building_type = building_electrics_industry } if = { limit = { level <= 0 is_under_construction = yes } scope:ec_current_state = { set_variable = { name = cbcbl value = 1 } } } else = { scope:ec_current_state = { set_variable = { name = cbcbl value = { value = prev.level min = 1 } } change_variable = { name = cbcbl multiply = { value = prev.occupancy min = 0 max = 1 } } } } } clear_saved_scope = ec_current_state } } while = { limit = { has_variable_list = cbcpl variable_list_size = { name = cbcpl value > 0 } var:cbb48c < ec_building_limit_adjusted } random_in_list = { variable = cbcpl limit = { save_temporary_scope_as = ec_current_state root = { any_in_list = { variable = cbcpl var:cbcbl > ec_current_cbcbl count < ec_simultaneously_developed } OR = { ec_current_cbcbl > 0 NOT = { any_in_list = { variable = cbcpl var:cbcbl >= ec_current_cbcbl ec_available_workforce > scope:ec_current_state.ec_available_workforce } } } } } set_variable = { name = cbnqc value = root.num_queued_constructions } start_building_construction = building_electrics_industry if = { limit = { var:cbnqc < root.num_queued_constructions } save_scope_as = ec_current_state random_scope_building = { limit = { is_building_type = building_electrics_industry } if = { limit = { level = 0 is_under_construction = yes } scope:ec_current_state = { set_variable = { name = cbcbl value = 1 } } } else = { scope:ec_current_state = { change_variable = { name = cbcbl add = { value = prev.occupancy min = 0.01 } } } } } clear_saved_scope = ec_current_state root = { change_variable = { name = cbb48c add = 1 } } } else = { remove_variable = cbcbl root = { remove_list_variable = { name = cbcpl target = prev } } } remove_variable = cbnqc } } every_in_list = { variable = cbcpl remove_variable = cbcbl } clear_variable_list = cbcpl }
 cbs49c = { every_in_list = { variable = $states$ root = { add_to_variable_list = { name = cbcpl target = prev } } if = { limit = { OR = { NOT = { has_building = building_war_machine_industry } any_scope_building = { is_building_type = building_war_machine_industry level <= 0 is_under_construction = no } } } set_variable = { name = cbcbl value = 0 } } else = { save_scope_as = ec_current_state random_scope_building = { limit = { is_building_type = building_war_machine_industry } if = { limit = { level <= 0 is_under_construction = yes } scope:ec_current_state = { set_variable = { name = cbcbl value = 1 } } } else = { scope:ec_current_state = { set_variable = { name = cbcbl value = { value = prev.level min = 1 } } change_variable = { name = cbcbl multiply = { value = prev.occupancy min = 0 max = 1 } } } } } clear_saved_scope = ec_current_state } } while = { limit = { has_variable_list = cbcpl variable_list_size = { name = cbcpl value > 0 } var:cbb49c < ec_building_limit_adjusted } random_in_list = { variable = cbcpl limit = { save_temporary_scope_as = ec_current_state root = { any_in_list = { variable = cbcpl var:cbcbl > ec_current_cbcbl count < ec_simultaneously_developed } OR = { ec_current_cbcbl > 0 NOT = { any_in_list = { variable = cbcpl var:cbcbl >= ec_current_cbcbl ec_available_workforce > scope:ec_current_state.ec_available_workforce } } } } } set_variable = { name = cbnqc value = root.num_queued_constructions } start_building_construction = building_war_machine_industry if = { limit = { var:cbnqc < root.num_queued_constructions } save_scope_as = ec_current_state random_scope_building = { limit = { is_building_type = building_war_machine_industry } if = { limit = { level = 0 is_under_construction = yes } scope:ec_current_state = { set_variable = { name = cbcbl value = 1 } } } else = { scope:ec_current_state = { change_variable = { name = cbcbl add = { value = prev.occupancy min = 0.01 } } } } } clear_saved_scope = ec_current_state root = { change_variable = { name = cbb49c add = 1 } } } else = { remove_variable = cbcbl root = { remove_list_variable = { name = cbcpl target = prev } } } remove_variable = cbnqc } } every_in_list = { variable = cbcpl remove_variable = cbcbl } clear_variable_list = cbcpl }
 
-ec_clear_technicals = { remove_variable = cber1 remove_variable = cber2 remove_variable = cber3 remove_variable = cber4 remove_variable = cber5 remove_variable = cber6 remove_variable = cber7 remove_variable = cber8 remove_variable = cber9 remove_variable = cber10 remove_variable = cber11 remove_variable = cber12 remove_variable = cber13 remove_variable = cber14 remove_variable = cber15 remove_variable = cber16 remove_variable = cber17 remove_variable = cber18 remove_variable = cber19 remove_variable = cber20 remove_variable = cber21 remove_variable = cber22 remove_variable = cber23 remove_variable = cber24 remove_variable = cber25 remove_variable = cber26 remove_variable = cber27 remove_variable = cber28 remove_variable = cber29 remove_variable = cber30 remove_variable = cber31 remove_variable = cber32 remove_variable = cber33 remove_variable = cber34 remove_variable = cber35 remove_variable = cber36 remove_variable = cber37 remove_variable = cber38 remove_variable = cber39 remove_variable = cber40 remove_variable = cber41 remove_variable = cber42 remove_variable = cber43 remove_variable = cber44 remove_variable = cber45 remove_variable = cber46 remove_variable = cber47 remove_variable = cber48 remove_variable = cber49 remove_variable = cbb1c remove_variable = cbb2c remove_variable = cbb3c remove_variable = cbb4c remove_variable = cbb5c remove_variable = cbb6c remove_variable = cbb7c remove_variable = cbb8c remove_variable = cbb9c remove_variable = cbb10c remove_variable = cbb11c remove_variable = cbb12c remove_variable = cbb13c remove_variable = cbb14c remove_variable = cbb15c remove_variable = cbb16c remove_variable = cbb17c remove_variable = cbb18c remove_variable = cbb23c remove_variable = cbb25c remove_variable = cbb26c remove_variable = cbb27c remove_variable = cbb28c remove_variable = cbb29c remove_variable = cbb30c remove_variable = cbb31c remove_variable = cbb32c remove_variable = cbb33c remove_variable = cbb34c remove_variable = cbb35c remove_variable = cbb36c remove_variable = cbb37c remove_variable = cbb38c remove_variable = cbb39c remove_variable = cbb40c remove_variable = cbb41c remove_variable = cbb42c remove_variable = cbb43c remove_variable = cbb44c remove_variable = cbb45c remove_variable = cbb46c remove_variable = cbb47c remove_variable = cbb48c remove_variable = cbb49c clear_variable_list = cbb1p1 clear_variable_list = cbb1p2 clear_variable_list = cbb1p3 clear_variable_list = cbb1p4 clear_variable_list = cbb1p5 clear_variable_list = cbb1p6 clear_variable_list = cbb2p1 clear_variable_list = cbb3p1 clear_variable_list = cbb4p1 clear_variable_list = cbb4p2 clear_variable_list = cbb4p3 clear_variable_list = cbb4p4 clear_variable_list = cbb4p5 clear_variable_list = cbb4p6 clear_variable_list = cbb5p1 clear_variable_list = cbb5p2 clear_variable_list = cbb5p3 clear_variable_list = cbb6p1 clear_variable_list = cbb6p2 clear_variable_list = cbb7p1 clear_variable_list = cbb7p2 clear_variable_list = cbb8p1 clear_variable_list = cbb8p2 clear_variable_list = cbb9p1 clear_variable_list = cbb9p2 clear_variable_list = cbb10p1 clear_variable_list = cbb10p2 clear_variable_list = cbb11p1 clear_variable_list = cbb11p2 clear_variable_list = cbb12p1 clear_variable_list = cbb12p2 clear_variable_list = cbb13p1 clear_variable_list = cbb13p2 clear_variable_list = cbb14p1 clear_variable_list = cbb14p2 clear_variable_list = cbb15p1 clear_variable_list = cbb15p2 clear_variable_list = cbb16p1 clear_variable_list = cbb16p2 clear_variable_list = cbb17p1 clear_variable_list = cbb17p2 clear_variable_list = cbb18p1 clear_variable_list = cbb18p2 clear_variable_list = cbb19p1 clear_variable_list = cbb19p2 clear_variable_list = cbb20p1 clear_variable_list = cbb20p2 clear_variable_list = cbb21p1 clear_variable_list = cbb21p2 clear_variable_list = cbb22p1 clear_variable_list = cbb22p2 clear_variable_list = cbb23p1 clear_variable_list = cbb23p2 clear_variable_list = cbb24p1 clear_variable_list = cbb24p2 clear_variable_list = cbb25p1 clear_variable_list = cbb25p2 clear_variable_list = cbb26p1 clear_variable_list = cbb26p2 clear_variable_list = cbb27p1 clear_variable_list = cbb27p2 clear_variable_list = cbb28p1 clear_variable_list = cbb28p2 clear_variable_list = cbb29p1 clear_variable_list = cbb29p2 clear_variable_list = cbb30p1 clear_variable_list = cbb30p2 clear_variable_list = cbb31p1 clear_variable_list = cbb31p2 clear_variable_list = cbb32p1 clear_variable_list = cbb32p2 clear_variable_list = cbb33p1 clear_variable_list = cbb34p1 clear_variable_list = cbb35p1 clear_variable_list = cbb36p1 clear_variable_list = cbb37p1 clear_variable_list = cbb38p1 clear_variable_list = cbb39p1 clear_variable_list = cbb40p1 clear_variable_list = cbb41p1 clear_variable_list = cbb42p1 clear_variable_list = cbb43p1 clear_variable_list = cbb44p1 clear_variable_list = cbb45p1 clear_variable_list = cbb46p1 clear_variable_list = cbb47p1 clear_variable_list = cbb48p1 clear_variable_list = cbb49p1 clear_variable_list = cbbp1 clear_variable_list = cbbp2 clear_variable_list = cbbp3 clear_variable_list = cbbp4 clear_variable_list = cbbp5 clear_variable_list = cbbp6 clear_variable_list = cbbp7 clear_variable_list = cbbp8 clear_variable_list = cbbp9 clear_variable_list = cbbp10 clear_variable_list = cbbp11 clear_variable_list = cbbp12 clear_variable_list = cbbp13 clear_variable_list = cbbp14 clear_variable_list = cbbp15 clear_variable_list = cbbp16 clear_variable_list = cbbp17 clear_variable_list = cbbp18 }
+ec_clear_technicals = { remove_variable = cber1 remove_variable = cber2 remove_variable = cber3 remove_variable = cber4 remove_variable = cber5 remove_variable = cber6 remove_variable = cber7 remove_variable = cber8 remove_variable = cber9 remove_variable = cber10 remove_variable = cber11 remove_variable = cber12 remove_variable = cber13 remove_variable = cber14 remove_variable = cber15 remove_variable = cber16 remove_variable = cber17 remove_variable = cber18 remove_variable = cber19 remove_variable = cber20 remove_variable = cber21 remove_variable = cber22 remove_variable = cber23 remove_variable = cber24 remove_variable = cber25 remove_variable = cber26 remove_variable = cber27 remove_variable = cber28 remove_variable = cber29 remove_variable = cber30 remove_variable = cber31 remove_variable = cber32 remove_variable = cber33 remove_variable = cber34 remove_variable = cber35 remove_variable = cber36 remove_variable = cber37 remove_variable = cber38 remove_variable = cber39 remove_variable = cber40 remove_variable = cber41 remove_variable = cber42 remove_variable = cber43 remove_variable = cber44 remove_variable = cber45 remove_variable = cber46 remove_variable = cber47 remove_variable = cber48 remove_variable = cber49 remove_variable = cbb1c remove_variable = cbb2c remove_variable = cbb3c remove_variable = cbb4c remove_variable = cbb5c remove_variable = cbb6c remove_variable = cbb7c remove_variable = cbb8c remove_variable = cbb9c remove_variable = cbb10c remove_variable = cbb11c remove_variable = cbb12c remove_variable = cbb13c remove_variable = cbb14c remove_variable = cbb15c remove_variable = cbb16c remove_variable = cbb17c remove_variable = cbb18c remove_variable = cbb23c remove_variable = cbb25c remove_variable = cbb26c remove_variable = cbb27c remove_variable = cbb28c remove_variable = cbb29c remove_variable = cbb30c remove_variable = cbb31c remove_variable = cbb32c remove_variable = cbb33c remove_variable = cbb34c remove_variable = cbb35c remove_variable = cbb36c remove_variable = cbb37c remove_variable = cbb38c remove_variable = cbb39c remove_variable = cbb40c remove_variable = cbb41c remove_variable = cbb42c remove_variable = cbb43c remove_variable = cbb44c remove_variable = cbb45c remove_variable = cbb46c remove_variable = cbb47c remove_variable = cbb48c remove_variable = cbb49c clear_variable_list = cbb1p1 clear_variable_list = cbb1p2 clear_variable_list = cbb1p3 clear_variable_list = cbb1p4 clear_variable_list = cbb1p5 clear_variable_list = cbb1p6 clear_variable_list = cbb2p1 clear_variable_list = cbb3p1 clear_variable_list = cbb4p1 clear_variable_list = cbb4p2 clear_variable_list = cbb4p3 clear_variable_list = cbb4p4 clear_variable_list = cbb4p5 clear_variable_list = cbb4p6 clear_variable_list = cbb4p7 clear_variable_list = cbb5p1 clear_variable_list = cbb5p2 clear_variable_list = cbb5p3 clear_variable_list = cbb6p1 clear_variable_list = cbb6p2 clear_variable_list = cbb7p1 clear_variable_list = cbb7p2 clear_variable_list = cbb8p1 clear_variable_list = cbb8p2 clear_variable_list = cbb9p1 clear_variable_list = cbb9p2 clear_variable_list = cbb10p1 clear_variable_list = cbb10p2 clear_variable_list = cbb11p1 clear_variable_list = cbb11p2 clear_variable_list = cbb12p1 clear_variable_list = cbb12p2 clear_variable_list = cbb13p1 clear_variable_list = cbb13p2 clear_variable_list = cbb14p1 clear_variable_list = cbb14p2 clear_variable_list = cbb15p1 clear_variable_list = cbb15p2 clear_variable_list = cbb16p1 clear_variable_list = cbb16p2 clear_variable_list = cbb17p1 clear_variable_list = cbb17p2 clear_variable_list = cbb18p1 clear_variable_list = cbb18p2 clear_variable_list = cbb19p1 clear_variable_list = cbb19p2 clear_variable_list = cbb20p1 clear_variable_list = cbb20p2 clear_variable_list = cbb21p1 clear_variable_list = cbb21p2 clear_variable_list = cbb22p1 clear_variable_list = cbb22p2 clear_variable_list = cbb23p1 clear_variable_list = cbb23p2 clear_variable_list = cbb24p1 clear_variable_list = cbb24p2 clear_variable_list = cbb25p1 clear_variable_list = cbb25p2 clear_variable_list = cbb26p1 clear_variable_list = cbb26p2 clear_variable_list = cbb27p1 clear_variable_list = cbb27p2 clear_variable_list = cbb28p1 clear_variable_list = cbb28p2 clear_variable_list = cbb29p1 clear_variable_list = cbb29p2 clear_variable_list = cbb30p1 clear_variable_list = cbb30p2 clear_variable_list = cbb31p1 clear_variable_list = cbb31p2 clear_variable_list = cbb32p1 clear_variable_list = cbb32p2 clear_variable_list = cbb33p1 clear_variable_list = cbb34p1 clear_variable_list = cbb35p1 clear_variable_list = cbb36p1 clear_variable_list = cbb37p1 clear_variable_list = cbb38p1 clear_variable_list = cbb39p1 clear_variable_list = cbb40p1 clear_variable_list = cbb41p1 clear_variable_list = cbb42p1 clear_variable_list = cbb43p1 clear_variable_list = cbb44p1 clear_variable_list = cbb45p1 clear_variable_list = cbb46p1 clear_variable_list = cbb47p1 clear_variable_list = cbb48p1 clear_variable_list = cbb49p1 clear_variable_list = cbbp1 clear_variable_list = cbbp2 clear_variable_list = cbbp3 clear_variable_list = cbbp4 clear_variable_list = cbbp5 clear_variable_list = cbbp6 clear_variable_list = cbbp7 clear_variable_list = cbbp8 clear_variable_list = cbbp9 clear_variable_list = cbbp10 clear_variable_list = cbbp11 clear_variable_list = cbbp12 clear_variable_list = cbbp13 clear_variable_list = cbbp14 clear_variable_list = cbbp15 clear_variable_list = cbbp16 clear_variable_list = cbbp17 clear_variable_list = cbbp18 }

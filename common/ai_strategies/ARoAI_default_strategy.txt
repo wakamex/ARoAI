@@ -475,8 +475,8 @@ ai_strategy_default = {
 	}
 	
 	wanted_construction_ratio = 1000000 # 1 level of construction sector per 1 million incorporated population
-	wanted_army_ratio = 200000 # 1 barrack per 200k incorporated population
-	wanted_navy_ratio = 400000 # 1 naval base per 400k coastal incorporated population
+	wanted_army_ratio = 250000 # 1 barrack per 200k incorporated population
+	wanted_navy_ratio = 500000 # 1 naval base per 400k coastal incorporated population
 	
 	subsidies = {
 		#building_power_plant = should_have

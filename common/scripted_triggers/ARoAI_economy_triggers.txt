@@ -1881,12 +1881,7 @@ ec_arable_is_possible = {
 							}
 						}
 					}
-					state_region = {
-						is_target_in_global_variable_list = {
-							name = $resource$
-							target = this
-						}
-					}
+					ec_check_arable_resource = { cipher = $cipher$ }
 				}
 				any_scope_building = {
 					is_building_type = $building$
@@ -1905,18 +1900,57 @@ ec_arable_is_possible = {
 					}
 				}
 			}
-			state_region = {
-				is_target_in_global_variable_list = {
-					name = $resource$
-					target = this
-				}
-			}
+			ec_check_arable_resource = { cipher = $cipher$ }
 		}
 		AND = {
 			$condition$ = 2
 			any_scope_building = {
 				is_building_type = $building$
 				ec_building_can_be_expanded = { shortage = $shortage$ profitability = $profitability$ }
+			}
+		}
+	}
+}
+
+ec_check_arable_resource = {
+	OR = {
+		AND = {
+			$cipher$ < 10
+			var:ecpar6 = $cipher$
+		}
+		AND = {
+			$cipher$ < 100
+			OR = {
+				var:ecpar5 = $cipher$
+				var:ecpar5 >= 30
+			}
+		}
+		AND = {
+			$cipher$ < 1000
+			OR = {
+				var:ecpar4 = $cipher$
+				var:ecpar4 >= 300
+			}
+		}
+		AND = {
+			$cipher$ < 10000
+			OR = {
+				var:ecpar3 = $cipher$
+				var:ecpar3 >= 3000
+			}
+		}
+		AND = {
+			$cipher$ < 100000
+			OR = {
+				var:ecpar2 = $cipher$
+				var:ecpar2 >= 30000
+			}
+		}
+		AND = {
+			$cipher$ < 1000000
+			OR = {
+				var:ecpar1 = $cipher$
+				var:ecpar1 >= 300000
 			}
 		}
 	}
@@ -2051,10 +2085,16 @@ ec_allocate_resource = {
 ec_allocate_arable = {
 	ec_arable_is_possible = {
 		building = $building$
-		resource = $resource$
+		#resource = $resource$
+		#good = $good$
+		cipher = $cipher$
 		condition = 0
 		shortage = $shortage$
 		profitability = $profitability$
+	}
+	OR = {
+		always = yes
+		has_potential_resource = $resource$
 	}
 	OR = {
 		AND = {
@@ -2068,13 +2108,13 @@ ec_allocate_arable = {
 				$good$ = g:sugar
 				$good$ = g:silk
 				NOR = {
-					has_potential_resource = bg_tea_plantations
-					has_potential_resource = bg_coffee_plantations
-					has_potential_resource = bg_dye_plantations
-					has_potential_resource = bg_tobacco_plantations
-					has_potential_resource = bg_opium_plantations
-					has_potential_resource = bg_sugar_plantations
-					has_potential_resource = bg_silk_plantations
+					ec_check_arable_resource = { cipher = 10000 }
+					ec_check_arable_resource = { cipher = 20000 }
+					ec_check_arable_resource = { cipher = 100 }
+					ec_check_arable_resource = { cipher = 100000 }
+					ec_check_arable_resource = { cipher = 200000 }
+					ec_check_arable_resource = { cipher = 2000 }
+					ec_check_arable_resource = { cipher = 200 }
 				}
 			}
 		}
@@ -2089,14 +2129,14 @@ ec_allocate_arable = {
 				$good$ = g:sugar
 				$good$ = g:silk
 			}
-			OR = {
-				has_potential_resource = bg_tea_plantations
-				has_potential_resource = bg_coffee_plantations
-				has_potential_resource = bg_dye_plantations
-				has_potential_resource = bg_tobacco_plantations
-				has_potential_resource = bg_opium_plantations
-				has_potential_resource = bg_sugar_plantations
-				has_potential_resource = bg_silk_plantations
+			NOR = {
+				ec_check_arable_resource = { cipher = 10000 }
+				ec_check_arable_resource = { cipher = 20000 }
+				ec_check_arable_resource = { cipher = 100 }
+				ec_check_arable_resource = { cipher = 100000 }
+				ec_check_arable_resource = { cipher = 200000 }
+				ec_check_arable_resource = { cipher = 2000 }
+				ec_check_arable_resource = { cipher = 200 }
 			}
 		}
 	}
@@ -2202,7 +2242,7 @@ ec_consider_government_administration = {
 		bureaucracy < ec_bureaucracy_1
 		AND = {
 			bureaucracy < ec_bureaucracy_excess
-			ec_government_costs_value < ec_government_costs_limit
+			ec_government_costs_value < ec_government_costs_target
 		}
 	}
 }
@@ -2344,7 +2384,7 @@ ec_consider_construction_sector = {
 		shortage = 1
 		profitability = 0
 	}
-	ec_construction_costs_value < ec_construction_costs_limit
+	ec_construction_costs_value < ec_construction_costs_target
 	ec_budget_health = {
 		level = -1
 	}
@@ -2540,12 +2580,6 @@ ec_evaluate_railway = {
 			$priority$ = 1
 			any_scope_state = {
 				infrastructure < ec_infrastructure_4
-				ec_allocate_infrastructure = {
-					building = building_railway 
-					priority = $priority$
-					shortage = 1
-					profitability = 0
-				}
 			}
 		}
 		AND = {
@@ -2555,39 +2589,30 @@ ec_evaluate_railway = {
 		}
 		AND = {
 			$priority$ = 5
-			OR = {
-				any_scope_state = {
-					infrastructure < ec_infrastructure_5
-					ec_allocate_infrastructure = {
-						building = building_railway 
-						priority = $priority$
-						shortage = 1
-						profitability = 0
-					}
-				}
-				ec_requirements_exact = {
-					market_good = mg:transportation
-					priority = 1
-					offset = 0
-				}
+			any_scope_state = {
+				infrastructure < ec_infrastructure_5
 			}
 		}
 		AND = {
 			$priority$ >= 6
+			$priority$ <= 8
+			always = no
+		}
+		AND = {
+			$priority$ = 9
+			ec_requirements_floor = {
+				market_good = mg:transportation
+				priority = 5
+				offset = 0
+			}
+		}
+		AND = {
+			$priority$ >= 10
 			$priority$ <= 15
 			always = no
 		}
 		AND = {
 			$priority$ = 16
-			any_scope_state = {
-				infrastructure < ec_infrastructure_6
-				ec_allocate_infrastructure = {
-					building = building_railway 
-					priority = $priority$
-					shortage = 1
-					profitability = 0
-				}
-			}
 			ec_requirements_floor = {
 				market_good = mg:transportation
 				priority = 11
@@ -2602,6 +2627,12 @@ ec_evaluate_railway = {
 }
 
 ec_allocate_railway = {
+	ec_allocate_infrastructure = {
+		building = building_railway 
+		priority = 1
+		shortage = 1
+		profitability = 0
+	}
 	OR = {
 		AND = {
 			$priority$ = 1
@@ -2630,15 +2661,16 @@ ec_allocate_railway = {
 			$priority$ = 6
 			infrastructure < ec_infrastructure_6
 			root = {
+				var:cber4 >= 9
+			}
+		}
+		AND = {
+			$priority$ = 7
+			infrastructure < ec_infrastructure_7
+			root = {
 				var:cber4 >= 16
 			}
 		}
-	}
-	ec_allocate_infrastructure = {
-		building = building_railway 
-		priority = 1
-		shortage = 1
-		profitability = 0
 	}
 }
 
@@ -2689,20 +2721,31 @@ ec_evaluate_port = {
 	OR = {
 		AND = {
 			$priority$ = 1
-			has_variable_list = ec_has_land_path_to_market_capital
+			has_variable_list = ec_coastline_of_market_capital
 			variable_list_size = {
-				name = ec_has_land_path_to_market_capital
+				name = ec_coastline_of_market_capital
 				value > 0
 			}
-			has_variable_list = ec_no_land_path_to_market_capital
-			variable_list_size = {
-				name = ec_no_land_path_to_market_capital
-				value > 0
+			OR = {
+				AND = {
+					has_variable_list = ec_coastline_of_outer_lands
+					variable_list_size = {
+						name = ec_coastline_of_outer_lands
+						value > 0
+					}
+				}
+				any_country = {
+					market.owner = root
+					any_scope_state = {
+						is_coastal = yes
+					}
+				}
 			}
-			any_in_list = {
-				variable = ec_has_land_path_to_market_capital
-				count <= 0
-				has_building = building_port
+			NOT = {
+				any_in_list = {
+					variable = ec_coastline_of_market_capital
+					has_building = building_port
+				}
 			}
 		}
 		AND = {
@@ -2726,7 +2769,7 @@ ec_evaluate_port = {
 					owner = root
 				}
 				any_scope_state = {
-					is_coastal = yes 
+					is_coastal = yes
 					infrastructure >= infrastructure_usage
 					market_access < 1
 					NOT = {
@@ -2798,7 +2841,7 @@ ec_allocate_port = {
 			root = {
 				var:cber5 = 1
 				is_target_in_variable_list = {
-					name = ec_has_land_path_to_market_capital
+					name = ec_coastline_of_market_capital
 					target = prev
 				}
 			}
@@ -2853,7 +2896,7 @@ ec_consider_barracks = {
 	OR = {
 		var:ec_barracks_count < ec_battalions_threshold
 		AND = {
-			ec_military_costs_value < ec_military_costs_limit
+			ec_military_costs_value < ec_military_costs_target
 			any_country = {
 				NOT = {
 					this = root
@@ -2988,7 +3031,7 @@ ec_consider_naval_base = {
 	OR = {
 		navy_size < ec_flotillas_threshold
 		AND = {
-			ec_military_costs_value < ec_military_costs_limit
+			ec_military_costs_value < ec_military_costs_target
 			any_country = {
 				NOT = {
 					this = root
@@ -3410,7 +3453,12 @@ ec_evaluate_wheat_farm = {
 }
 
 ec_allocate_wheat_farm = {
-	ec_allocate_arable = { priority = $priority$ building = building_wheat_farm resource = bg_wheat_farms good = g:grain 
+	ec_allocate_arable = {
+		building = building_wheat_farm
+		resource = bg_wheat_farms
+		good = g:grain
+		cipher = 1
+		priority = $priority$
 		shortage = 1
 		profitability = 1
 	}
@@ -3432,7 +3480,12 @@ ec_evaluate_rye_farm = {
 }
 
 ec_allocate_rye_farm = {
-	ec_allocate_arable = { priority = $priority$ building = building_rye_farm resource = bg_rye_farms good = g:grain 
+	ec_allocate_arable = {
+		building = building_rye_farm
+		priority = $priority$
+		resource = bg_rye_farms
+		good = g:grain
+		cipher = 2
 		shortage = 1
 		profitability = 1
 	}
@@ -3454,7 +3507,12 @@ ec_evaluate_rice_farm = {
 }
 
 ec_allocate_rice_farm = {
-	ec_allocate_arable = { priority = $priority$ building = building_rice_farm resource = bg_rice_farms good = g:grain 
+	ec_allocate_arable = {
+		building = building_rice_farm
+		priority = $priority$
+		resource = bg_rice_farms
+		good = g:grain
+		cipher = 3
 		shortage = 1
 		profitability = 1
 	}
@@ -3476,7 +3534,12 @@ ec_evaluate_maize_farm = {
 }
 
 ec_allocate_maize_farm = {
-	ec_allocate_arable = { priority = $priority$ building = building_maize_farm resource = bg_maize_farms good = g:grain 
+	ec_allocate_arable = {
+		building = building_maize_farm
+		priority = $priority$
+		resource = bg_maize_farms
+		good = g:grain
+		cipher = 4
 		shortage = 1
 		profitability = 1
 	}
@@ -3498,7 +3561,12 @@ ec_evaluate_millet_farm = {
 }
 
 ec_allocate_millet_farm = {
-	ec_allocate_arable = { priority = $priority$ building = building_millet_farm resource = bg_millet_farms good = g:grain 
+	ec_allocate_arable = {
+		building = building_millet_farm
+		priority = $priority$
+		resource = bg_millet_farms
+		good = g:grain
+		cipher = 5
 		shortage = 1
 		profitability = 1
 	}
@@ -3529,7 +3597,12 @@ ec_evaluate_livestock_ranch = {
 }
 
 ec_allocate_livestock_ranch = {
-	ec_allocate_arable = { priority = $priority$ building = building_livestock_ranch resource = bg_livestock_ranches good = g:fabric 
+	ec_allocate_arable = {
+		building = building_livestock_ranch
+		priority = $priority$
+		resource = bg_livestock_ranches
+		good = g:fabric
+		cipher = 10
 		shortage = 1
 		profitability = 1
 	}
@@ -3551,7 +3624,12 @@ ec_evaluate_cotton_plantation = {
 }
 
 ec_allocate_cotton_plantation = {
-	ec_allocate_arable = { priority = $priority$ building = building_cotton_plantation resource = bg_cotton_plantations good = g:fabric 
+	ec_allocate_arable = {
+		building = building_cotton_plantation
+		priority = $priority$
+		resource = bg_cotton_plantations
+		good = g:fabric
+		cipher = 20
 		shortage = 1
 		profitability = 1
 	}
@@ -3573,7 +3651,12 @@ ec_evaluate_dye_plantation = {
 }
 
 ec_allocate_dye_plantation = {
-	ec_allocate_arable = { priority = $priority$ building = building_dye_plantation resource = bg_dye_plantations good = g:dye 
+	ec_allocate_arable = {
+		building = building_dye_plantation
+		priority = $priority$
+		resource = bg_dye_plantations
+		good = g:dye
+		cipher = 100
 		shortage = 1
 		profitability = 1
 	}
@@ -3595,7 +3678,12 @@ ec_evaluate_silk_plantation = {
 }
 
 ec_allocate_silk_plantation = {
-	ec_allocate_arable = { priority = $priority$ building = building_silk_plantation resource = bg_silk_plantations good = g:silk 
+	ec_allocate_arable = {
+		building = building_silk_plantation
+		priority = $priority$
+		resource = bg_silk_plantations
+		good = g:silk
+		cipher = 200
 		shortage = 1
 		profitability = 1
 	}
@@ -3623,7 +3711,12 @@ ec_evaluate_banana_plantation = {
 }
 
 ec_allocate_banana_plantation = {
-	ec_allocate_arable = { priority = $priority$ building = building_banana_plantation resource = bg_banana_plantations good = g:fruit 
+	ec_allocate_arable = {
+		building = building_banana_plantation
+		priority = $priority$
+		resource = bg_banana_plantations
+		good = g:fruit
+		cipher = 1000
 		shortage = 1
 		profitability = 1
 	}
@@ -3645,7 +3738,12 @@ ec_evaluate_sugar_plantation = {
 }
 
 ec_allocate_sugar_plantation = {
-	ec_allocate_arable = { priority = $priority$ building = building_sugar_plantation resource = bg_sugar_plantations good = g:sugar 
+	ec_allocate_arable = {
+		building = building_sugar_plantation
+		priority = $priority$
+		resource = bg_sugar_plantations
+		good = g:sugar
+		cipher = 2000
 		shortage = 1
 		profitability = 1
 	}
@@ -3676,7 +3774,12 @@ ec_evaluate_tea_plantation = {
 }
 
 ec_allocate_tea_plantation = {
-	ec_allocate_arable = { priority = $priority$ building = building_tea_plantation resource = bg_tea_plantations good = g:tea 
+	ec_allocate_arable = {
+		building = building_tea_plantation
+		priority = $priority$
+		resource = bg_tea_plantations
+		good = g:tea
+		cipher = 10000
 		shortage = 1
 		profitability = 1
 	}
@@ -3707,7 +3810,12 @@ ec_evaluate_coffee_plantation = {
 }
 
 ec_allocate_coffee_plantation = {
-	ec_allocate_arable = { priority = $priority$ building = building_coffee_plantation resource = bg_coffee_plantations good = g:coffee 
+	ec_allocate_arable = {
+		building = building_coffee_plantation
+		priority = $priority$
+		resource = bg_coffee_plantations
+		good = g:coffee
+		cipher = 20000
 		shortage = 1
 		profitability = 1
 	}
@@ -3743,7 +3851,12 @@ ec_evaluate_tobacco_plantation = {
 }
 
 ec_allocate_tobacco_plantation = {
-	ec_allocate_arable = { priority = $priority$ building = building_tobacco_plantation resource = bg_tobacco_plantations good = g:tobacco 
+	ec_allocate_arable = {
+		building = building_tobacco_plantation
+		priority = $priority$
+		resource = bg_tobacco_plantations
+		good = g:tobacco
+		cipher = 100000
 		shortage = 1
 		profitability = 1
 	}
@@ -3777,7 +3890,12 @@ ec_evaluate_opium_plantation = {
 }
 
 ec_allocate_opium_plantation = {
-	ec_allocate_arable = { priority = $priority$ building = building_opium_plantation resource = bg_opium_plantations good = g:opium 
+	ec_allocate_arable = {
+		building = building_opium_plantation
+		priority = $priority$
+		resource = bg_opium_plantations
+		good = g:opium
+		cipher = 200000
 		shortage = 1
 		profitability = 1
 	}

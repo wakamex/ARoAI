@@ -300,61 +300,10 @@ ARoAI_economy_events.301 = {
 				name = ec_checked_arable_resources
 				value = 3
 			}
-			ec_start_arable_resources_check = yes
-		}
-		trigger_event = {
-			id = ARoAI_economy_events.302
-			days = 1
-		}
-	}
-}
-
-ARoAI_economy_events.302 = {
-	type = country_event
-	hidden = yes
-	
-	trigger = {}
-	
-	immediate = {
-		if = {
-			limit = {
-				has_global_variable = ec_checked_arable_resources
-				global_var:ec_checked_arable_resources < 4
-			}
-			set_global_variable = {
-				name = ec_checked_arable_resources
-				value = 4
-			}
-			ec_finish_arable_resources_check = yes
-		}
-		trigger_event = {
-			id = ARoAI_economy_events.303
-			days = 0
-		}
-	}
-}
-
-ARoAI_economy_events.303 = {
-	type = country_event
-	hidden = yes
-	
-	trigger = {}
-	
-	immediate = {
-		if = {
-			limit = {
-				has_global_variable = ec_checked_arable_resources
-				global_var:ec_checked_arable_resources < 5
-			}
-			set_global_variable = {
-				name = ec_checked_arable_resources
-				value = 5
-			}
 			every_country = {
 				every_scope_state = {
 					state_region = {
-						remove_variable = ec_checking_arable_resources
-						remove_variable = ec_checked_arable_resources
+						remove_variable = eccar
 					}
 				}
 			}

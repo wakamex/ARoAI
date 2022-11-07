@@ -1,52 +1,4 @@
 ﻿
-ec_can_cut_government_wages = {
-	OR = {
-		NOT = {
-			exists = ig:ig_intelligentsia
-		}
-		AND = {
-			exists = ig:ig_intelligentsia
-			ig:ig_intelligentsia = {
-				OR = {
-					AND = {
-						is_in_government = yes
-						ig_approval > -1
-					}
-					AND = {
-						is_in_government = no
-						ig_approval > -6
-					}
-					is_marginal = yes
-				}
-			}
-		}
-	}
-}
-
-ec_can_cut_military_wages = {
-	OR = {
-		NOT = {
-			exists = ig:ig_armed_forces
-		}
-		AND = {
-			exists = ig:ig_armed_forces
-			ig:ig_armed_forces = {
-				OR = {
-					AND = {
-						is_in_government = yes
-						ig_approval > -1
-					}
-					AND = {
-						is_in_government = no
-						ig_approval > -6
-					}
-					is_marginal = yes
-				}
-			}
-		}
-	}
-}
-
 ### ENTRY REQUIREMENTS FOR MAJOR PARTS OF THE SCRIPT
 
 # Requirements of the script as a whole and specifically for collecting population and budget data
@@ -59,7 +11,7 @@ ec_country_allowed = {
 # Requirements for downsizing government funded buildings which is mostly a budget balancing thing
 
 ec_downsizing_allowed = {
-	has_variable = ec_country_weekly_income
+	has_variable = ec_country_weekly_surplus
 	has_variable = ec_incorporated_population
 	has_revolution = no
 	is_revolutionary = no
@@ -69,13 +21,13 @@ ec_downsizing_allowed = {
 # Requirements for constructing both special and standard buildings
 
 ec_building_allowed = {
-	has_variable = ec_country_weekly_income
+	has_variable = ec_country_weekly_surplus
 	has_variable = ec_incorporated_population
 	has_revolution = no
 	is_revolutionary = no
 	ec_identifying_object_list_is_correct = yes
 	ec_invalid_objects_in_building_priority_lists = no
-	scaled_debt < 0.60
+	scaled_debt < 0.50
 	OR = {
 		is_player = no
 		AND = {
@@ -404,7 +356,7 @@ ec_budget_health = {
 			$level$ = -4
 			OR = {
 				scaled_debt < 0.875
-				ec_country_weekly_income >= ec_10_percent_proficit
+				ec_country_weekly_surplus >= ec_10_percent_proficit
 			}
 		}
 		AND = {
@@ -412,7 +364,7 @@ ec_budget_health = {
 			OR = {
 				scaled_debt < 0.750
 				AND = {
-					ec_country_weekly_income >= ec_10_percent_proficit
+					ec_country_weekly_surplus >= ec_10_percent_proficit
 					scaled_debt < 0.875
 				}
 			}
@@ -422,7 +374,7 @@ ec_budget_health = {
 			OR = {
 				scaled_debt < 0.500
 				AND = {
-					ec_country_weekly_income >= ec_10_percent_proficit
+					ec_country_weekly_surplus >= ec_10_percent_proficit
 					scaled_debt < 0.625
 				}
 			}
@@ -432,7 +384,7 @@ ec_budget_health = {
 			OR = {
 				scaled_debt < 0.250
 				AND = {
-					ec_country_weekly_income >= ec_10_percent_proficit
+					ec_country_weekly_surplus >= ec_10_percent_proficit
 					scaled_debt < 0.375
 				}
 			}
@@ -441,40 +393,113 @@ ec_budget_health = {
 			$level$ = 0
 			OR = {
 				AND = {
-					ec_country_weekly_income >= 0
+					ec_country_weekly_surplus >= 0
 					scaled_debt <= 0
 				}
 				AND = {
-					ec_country_weekly_income >= ec_10_percent_proficit
+					ec_country_weekly_surplus >= ec_10_percent_proficit
 					scaled_debt < 0.125
 				}
 				AND = {
-					ec_country_weekly_income < 0
-					ec_weeks_of_reserves >= 156
+					ec_country_weekly_surplus < 0
+					ec_weeks_of_reserves >= 208
 				}
 			}
 			NOT = {
-				ec_country_weekly_income <= ec_15_percent_deficit
+				ec_country_weekly_surplus <= ec_15_percent_deficit
 			}
 		}
 		AND = {
 			$level$ = 1
 			OR = {
 				AND = {
-					ec_country_weekly_income >= ec_20_percent_proficit
+					ec_country_weekly_surplus >= ec_20_percent_proficit
 					scaled_debt <= 0
 				}
 				AND = {
-					ec_country_weekly_income >= ec_15_percent_proficit
+					ec_country_weekly_surplus >= ec_15_percent_proficit
 					ec_gold_reserves_percent >= 0.25
 				}
 				AND = {
-					ec_country_weekly_income >= ec_10_percent_proficit
+					ec_country_weekly_surplus >= ec_10_percent_proficit
 					ec_gold_reserves_percent >= 0.50
 				}
 				AND = {
-					ec_country_weekly_income >= ec_5_percent_proficit
+					ec_country_weekly_surplus >= ec_5_percent_proficit
 					ec_gold_reserves_percent >= 0.75
+				}
+			}
+		}
+	}
+}
+
+### IS IT ALLOWED TO CUT BUDGET WAGES
+
+ec_can_cut_government_wages = {
+	OR = {
+		NOT = {
+			exists = ig:ig_intelligentsia
+		}
+		AND = {
+			exists = ig:ig_intelligentsia
+			ig:ig_intelligentsia = {
+				OR = {
+					root = {
+						NOT = {
+							ec_budget_health = {
+								level = -2
+							}
+						}
+					}
+					AND = {
+						is_in_government = yes
+						ig_approval > -1
+					}
+					AND = {
+						is_in_government = no
+						ig_approval > -6
+					}
+					is_marginal = yes
+				}
+			}
+		}
+	}
+}
+
+ec_can_cut_military_wages = {
+	OR = {
+		NOT = {
+			exists = ig:ig_armed_forces
+		}
+		AND = {
+			exists = ig:ig_armed_forces
+			ig:ig_armed_forces = {
+				OR = {
+					root = {
+						NOT = {
+							ec_budget_health = {
+								level = -2
+							}
+						}
+						NOR = {
+							is_at_war = yes
+							any_scope_general = {
+								is_mobilized = yes
+							}
+							any_scope_state = {
+								has_active_building = building_conscription_center
+							}
+						}
+					}
+					AND = {
+						is_in_government = yes
+						ig_approval > -1
+					}
+					AND = {
+						is_in_government = no
+						ig_approval > -6
+					}
+					is_marginal = yes
 				}
 			}
 		}
@@ -1762,6 +1787,12 @@ ec_infrastructure_is_possible = {
 # Resource buildings
 
 ec_resource_is_possible = {
+	state_region = {
+		remaining_undepleted = {
+			type = $resource$
+			amount > 0
+		}
+	}
 	OR = {
 		AND = {
 			$condition$ = 0
@@ -1850,13 +1881,12 @@ ec_arable_is_possible = {
 							}
 						}
 					}
-					#state_region = {
-					#	is_target_in_global_variable_list = {
-					#		name = $resource$
-					#		target = this
-					#	}
-					#}
-					has_potential_resource = $resource$
+					state_region = {
+						is_target_in_global_variable_list = {
+							name = $resource$
+							target = this
+						}
+					}
 				}
 				any_scope_building = {
 					is_building_type = $building$
@@ -1875,13 +1905,12 @@ ec_arable_is_possible = {
 					}
 				}
 			}
-			#state_region = {
-			#	is_target_in_global_variable_list = {
-			#		name = $resource$
-			#		target = this
-			#	}
-			#}
-			has_potential_resource = $resource$
+			state_region = {
+				is_target_in_global_variable_list = {
+					name = $resource$
+					target = this
+				}
+			}
 		}
 		AND = {
 			$condition$ = 2
@@ -2172,7 +2201,7 @@ ec_consider_government_administration = {
 	OR = {
 		bureaucracy < ec_bureaucracy_1
 		AND = {
-			bureaucracy < ec_bureaucracy_ceiling
+			bureaucracy < ec_bureaucracy_excess
 			ec_government_costs_value < ec_government_costs_limit
 		}
 	}
@@ -2396,7 +2425,7 @@ ec_consider_university = {
 		shortage = 1
 		profitability = 0
 	}
-	ec_government_costs_value < ec_government_costs_limit_and_a_half
+	ec_government_costs_value < ec_government_costs_excess
 }
 
 ec_evaluate_university = {
@@ -2526,13 +2555,20 @@ ec_evaluate_railway = {
 		}
 		AND = {
 			$priority$ = 5
-			any_scope_state = {
-				infrastructure < ec_infrastructure_5
-				ec_allocate_infrastructure = {
-					building = building_railway 
-					priority = $priority$
-					shortage = 1
-					profitability = 0
+			OR = {
+				any_scope_state = {
+					infrastructure < ec_infrastructure_5
+					ec_allocate_infrastructure = {
+						building = building_railway 
+						priority = $priority$
+						shortage = 1
+						profitability = 0
+					}
+				}
+				ec_requirements_exact = {
+					market_good = mg:transportation
+					priority = 1
+					offset = 0
 				}
 			}
 		}
@@ -2616,14 +2652,25 @@ ec_consider_port = {
 	any_scope_state = {
 		is_coastal = yes
 	}
-	ec_government_costs_value < ec_government_costs_limit_and_a_half
-	ec_convoys_current < ec_convoys_ceiling
 }
 
 ec_evaluate_port = {
 	OR = {
+		$priority$ <= 2
 		AND = {
-			$priority$ <= 1
+			$priority$ = 3
+			ec_government_costs_value < ec_government_costs_ceiling
+			ec_convoys_current < ec_convoys_ceiling
+		}
+		AND = {
+			$priority$ >= 4
+			ec_government_costs_value < ec_government_costs_excess
+			ec_convoys_current < ec_convoys_target
+		}
+	}
+	OR = {
+		AND = {
+			$priority$ <= 2
 			ec_consider_building = {
 				building = building_port
 				shortage = 0
@@ -2631,7 +2678,7 @@ ec_evaluate_port = {
 			}
 		}
 		AND = {
-			$priority$ >= 2
+			$priority$ >= 3
 			ec_consider_building = {
 				building = building_port
 				shortage = 1
@@ -2642,6 +2689,24 @@ ec_evaluate_port = {
 	OR = {
 		AND = {
 			$priority$ = 1
+			has_variable_list = ec_has_land_path_to_market_capital
+			variable_list_size = {
+				name = ec_has_land_path_to_market_capital
+				value > 0
+			}
+			has_variable_list = ec_no_land_path_to_market_capital
+			variable_list_size = {
+				name = ec_no_land_path_to_market_capital
+				value > 0
+			}
+			any_in_list = {
+				variable = ec_has_land_path_to_market_capital
+				count <= 0
+				has_building = building_port
+			}
+		}
+		AND = {
+			$priority$ = 2
 			any_scope_state = {
 				is_isolated_from_market = yes
 				ec_infrastructure_is_possible = {
@@ -2653,7 +2718,7 @@ ec_evaluate_port = {
 			}
 		}
 		AND = {
-			$priority$ = 2
+			$priority$ = 3
 			any_country = {
 				exists = market
 				market = {
@@ -2674,9 +2739,9 @@ ec_evaluate_port = {
 			}
 		}
 		AND = {
-			$priority$ = 3
+			$priority$ = 4
 			OR = {
-				ec_convoys_current < ec_convoys_3
+				ec_convoys_current < ec_convoys_4
 				any_scope_state = {
 					is_coastal = yes
 					infrastructure < ec_infrastructure_5
@@ -2688,10 +2753,6 @@ ec_evaluate_port = {
 					}
 				}
 			}
-		}
-		AND = {
-			$priority$ = 4
-			ec_convoys_current < ec_convoys_4
 		}
 		AND = {
 			$priority$ = 5
@@ -2734,6 +2795,16 @@ ec_allocate_port = {
 	OR = {
 		AND = {
 			$priority$ = 1
+			root = {
+				var:cber5 = 1
+				is_target_in_variable_list = {
+					name = ec_has_land_path_to_market_capital
+					target = prev
+				}
+			}
+		}
+		AND = {
+			$priority$ = 2
 			is_isolated_from_market = yes
 			ec_infrastructure_is_possible = {
 				building = building_port
@@ -2743,9 +2814,9 @@ ec_allocate_port = {
 			}
 		}
 		AND = {
-			$priority$ = 2
+			$priority$ = 3
 			root = {
-				var:cber5 >= 2
+				var:cber5 >= 3
 			}
 			OR = {
 				infrastructure < ec_infrastructure_5
@@ -2788,6 +2859,7 @@ ec_consider_barracks = {
 					this = root
 				}
 				OR = {
+					has_diplomatic_relevance = root
 					has_war_with = root
 					has_diplomatic_pact = {
 						who = root
@@ -2799,9 +2871,21 @@ ec_consider_barracks = {
 							type = rivalry
 						}
 					}
-					has_diplomatic_relevance = root
+					any_scope_ally = {
+						has_war_with = root
+						has_diplomatic_pact = {
+							who = root
+							type = rivalry
+						}
+						root = {
+							has_diplomatic_pact = {
+								who = prev
+								type = rivalry
+							}
+						}
+					}
 				}
-				ec_army_power_projection >= root.ec_80_percent_of_army_power_projection
+				ec_133_percent_of_army_power_projection >= root.ec_army_power_projection
 			}
 		}
 	}
@@ -2910,6 +2994,7 @@ ec_consider_naval_base = {
 					this = root
 				}
 				OR = {
+					has_diplomatic_relevance = root
 					has_war_with = root
 					has_diplomatic_pact = {
 						who = root
@@ -2921,13 +3006,21 @@ ec_consider_naval_base = {
 							type = rivalry
 						}
 					}
-					any_scope_state = {
-						any_neighbouring_state = {
-							owner = root
+					any_scope_ally = {
+						has_war_with = root
+						has_diplomatic_pact = {
+							who = root
+							type = rivalry
+						}
+						root = {
+							has_diplomatic_pact = {
+								who = prev
+								type = rivalry
+							}
 						}
 					}
 				}
-				ec_navy_power_projection >= root.ec_80_percent_of_navy_power_projection
+				ec_133_percent_of_navy_power_projection >= root.ec_navy_power_projection
 			}
 		}
 	}
@@ -3247,12 +3340,6 @@ ec_evaluate_gold_mine = {
 }
 
 ec_allocate_gold_mine = {
-	state_region = {
-		remaining_undepleted = {
-			type = bg_gold_mining
-			amount > 0
-		}
-	}
 	ec_allocate_resource = {
 		building = building_gold_mine
 		resource = bg_gold_mining
@@ -4005,20 +4092,37 @@ ec_consider_shipyards = {
 
 ec_evaluate_shipyards = {
 	OR = {
-		ec_requirements_exact = { priority = $priority$ offset = 2 market_good = mg:clippers }
 		AND = {
-			ec_requirements_exact = { priority = $priority$ offset = 2 market_good = mg:manowars }
 			OR = {
-				is_at_war = no
-				ec_requirements_floor = {
-					market_good = mg:manowars
-					priority = 6
-					offset = 0
+				ec_requirements_exact = { priority = $priority$ offset = 2 market_good = mg:clippers }
+				AND = {
+					ec_requirements_exact = { priority = $priority$ offset = 2 market_good = mg:manowars }
+					OR = {
+						is_at_war = no
+						ec_requirements_floor = {
+							market_good = mg:manowars
+							priority = 6
+							offset = 0
+						}
+					}
+				}
+			}
+			OR = {
+				NOT = {
+					any_scope_building = {
+						is_building_type = building_shipyards
+					}
+				}
+				any_scope_building = {
+					is_building_type = building_shipyards
+					OR = {
+						has_active_production_method = pm_basic_shipbuilding
+						has_active_production_method = pm_complex_shipbuilding
+					}
 				}
 			}
 		}
 		AND = {
-			has_technology_researched = ironclad_tech
 			OR = {
 				ec_requirements_exact = { priority = $priority$ offset = 2 market_good = mg:steamers }
 				AND = {
@@ -4030,6 +4134,20 @@ ec_evaluate_shipyards = {
 							priority = 6
 							offset = 0
 						}
+					}
+				}
+			}
+			OR = {
+				NOT = {
+					any_scope_building = {
+						is_building_type = building_shipyards
+					}
+				}
+				any_scope_building = {
+					is_building_type = building_shipyards
+					OR = {
+						has_active_production_method = pm_metal_shipbuilding
+						has_active_production_method = pm_arc_welding_shipbuilding
 					}
 				}
 			}

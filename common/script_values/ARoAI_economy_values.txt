@@ -112,29 +112,40 @@ ec_80_percent_of_navy_power_projection = {
 
 ec_institution_bureaucracy_cost = {
 	value = var:ec_incorporated_population
-	divide = 10000
+	divide = 100000
 }
 
 ### COUNTRY BUDGET
 
-ec_10_percent_of_income = {
+ec_5_percent_proficit = {
+	value = income
+	multiply = 0.05
+}
+
+ec_10_percent_proficit = {
 	value = income
 	multiply = 0.10
 }
 
-ec_15_percent_of_income = {
+ec_15_percent_proficit = {
 	value = income
 	multiply = 0.15
 }
 
-ec_20_percent_of_income = {
+ec_20_percent_proficit = {
 	value = income
 	multiply = 0.20
 }
 
-ec_25_percent_of_income = {
+ec_25_percent_proficit = {
 	value = income
 	multiply = 0.25
+}
+
+ec_15_percent_deficit = {
+	value = 0
+	subtract = income
+	multiply = 0.15
 }
 
 ec_gold_reserves_percent = {
@@ -487,12 +498,26 @@ ec_bureaucracy_target = {
 	max = 1000000
 }
 
+ec_bureaucracy_produced = {
+	value = modifier:country_bureaucracy_add
+	multiply = {
+		value = modifier:country_bureaucracy_mult
+		add = 1
+	}
+}
+
+ec_bureaucracy_usage = {
+	value = ec_bureaucracy_produced
+	subtract = bureaucracy
+}
+
 ec_bureaucracy_excess = {
-	value = produced_bureaucracy
-	multiply = 0.25
+	value = ec_bureaucracy_usage
+	multiply = 0.20
 	min = {
 		value = ec_bureaucracy_target
 		add = 100
+		multiply = 1.10
 		min = 100
 		max = 1000000
 	}
@@ -500,11 +525,12 @@ ec_bureaucracy_excess = {
 }
 
 ec_bureaucracy_ceiling = {
-	value = produced_bureaucracy
-	multiply = 0.50
+	value = ec_bureaucracy_usage
+	multiply = 0.40
 	min = {
 		value = ec_bureaucracy_target
 		add = 100
+		multiply = 1.20
 		min = 100
 		max = 1000000
 	}
@@ -512,8 +538,16 @@ ec_bureaucracy_ceiling = {
 }
 
 ec_bureaucracy_ceiling_excess = {
-	value = ec_bureaucracy_ceiling
-	multiply = 1.2
+	value = ec_bureaucracy_usage
+	multiply = 0.60
+	min = {
+		value = ec_bureaucracy_target
+		add = 100
+		multiply = 1.30
+		min = 100
+		max = 1000000
+	}
+	max = 1000000
 }
 
 ### CONSTRUCTION TARGETS
@@ -1258,6 +1292,11 @@ ec_simultaneously_developed = {
 }
 
 ### PURELY TECHNICAL STUFF
+
+ec_points_for_three_buildings = {
+	value = var:ec_construction_points_per_building
+	multiply = 2.50
+}
 
 ec_current_cbcbl = {
 	value = scope:ec_current_state.var:cbcbl

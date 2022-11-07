@@ -1,12 +1,12 @@
-﻿ec_autobuild = {
-	default = ec_allow_autobuild
-	ec_allow_autobuild = {}
-	ec_disallow_autobuild = {}
-}
-
-rs_mode = {
+﻿rs_mode = {
 	default = rs_default
 	rs_default = {}
 	rs_railroaded = {}
 	rs_disabled = {}
+}
+
+ec_autobuild = {
+	default = ec_allow_autobuild
+	ec_allow_autobuild = {}
+	ec_disallow_autobuild = {}
 }

@@ -5,7 +5,7 @@
 
 	wanted_construction_ratio = 2000000 # 1 level of construction sector per 2 million incorporated population
 
-	desired_tax_level = high
+	desired_tax_level = very_high
 	max_tax_level = very_high
 	min_tax_level = very_low
 
@@ -109,7 +109,7 @@ ai_strategy_plantation_economy = {
 
 	wanted_construction_ratio = 2000000 # 1 level of construction sector per 2 million incorporated population
 
-	desired_tax_level = high
+	desired_tax_level = very_high
 	max_tax_level = very_high
 	min_tax_level = very_low
 	
@@ -181,7 +181,7 @@ ai_strategy_resource_expansion = {
 
 	wanted_construction_ratio = 1500000 # 1 level of construction sector per 1.5 million incorporated population
 
-	desired_tax_level = high
+	desired_tax_level = very_high
 	max_tax_level = very_high
 	min_tax_level = very_low
 	
@@ -284,11 +284,11 @@ ai_strategy_industrial_expansion = {
 	
 	wanted_construction_ratio = 1000000 # 1 level of construction sector per 1 million incorporated population
 
-	desired_tax_level = high
+	desired_tax_level = very_high
 	max_tax_level = very_high
 	min_tax_level = very_low
 	
-	#desired_tax_level = high
+	#desired_tax_level = very_high
 	#max_tax_level = very_high
 	
 	#subsidies = {
@@ -385,7 +385,7 @@ ai_strategy_placate_population = {
 
 	wanted_construction_ratio = 10000000 # 1 level of construction sector per 10 million incorporated population
 
-	desired_tax_level = high
+	desired_tax_level = very_high
 	max_tax_level = very_high
 	min_tax_level = very_low
 	

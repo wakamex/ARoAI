@@ -404,7 +404,7 @@ ec_budget_health = {
 			$level$ = -4
 			OR = {
 				scaled_debt < 0.875
-				ec_country_weekly_income >= ec_10_percent_of_income
+				ec_country_weekly_income >= ec_10_percent_proficit
 			}
 		}
 		AND = {
@@ -412,7 +412,7 @@ ec_budget_health = {
 			OR = {
 				scaled_debt < 0.750
 				AND = {
-					ec_country_weekly_income >= ec_10_percent_of_income
+					ec_country_weekly_income >= ec_10_percent_proficit
 					scaled_debt < 0.875
 				}
 			}
@@ -422,7 +422,7 @@ ec_budget_health = {
 			OR = {
 				scaled_debt < 0.500
 				AND = {
-					ec_country_weekly_income >= ec_10_percent_of_income
+					ec_country_weekly_income >= ec_10_percent_proficit
 					scaled_debt < 0.625
 				}
 			}
@@ -432,7 +432,7 @@ ec_budget_health = {
 			OR = {
 				scaled_debt < 0.250
 				AND = {
-					ec_country_weekly_income >= ec_10_percent_of_income
+					ec_country_weekly_income >= ec_10_percent_proficit
 					scaled_debt < 0.375
 				}
 			}
@@ -445,7 +445,7 @@ ec_budget_health = {
 					scaled_debt <= 0
 				}
 				AND = {
-					ec_country_weekly_income >= ec_10_percent_of_income
+					ec_country_weekly_income >= ec_10_percent_proficit
 					scaled_debt < 0.125
 				}
 				AND = {
@@ -453,24 +453,27 @@ ec_budget_health = {
 					ec_weeks_of_reserves >= 156
 				}
 			}
+			NOT = {
+				ec_country_weekly_income <= ec_15_percent_deficit
+			}
 		}
 		AND = {
 			$level$ = 1
 			OR = {
 				AND = {
-					ec_country_weekly_income >= ec_25_percent_of_income
+					ec_country_weekly_income >= ec_20_percent_proficit
 					scaled_debt <= 0
 				}
 				AND = {
-					ec_country_weekly_income >= ec_20_percent_of_income
+					ec_country_weekly_income >= ec_15_percent_proficit
 					ec_gold_reserves_percent >= 0.25
 				}
 				AND = {
-					ec_country_weekly_income >= ec_15_percent_of_income
+					ec_country_weekly_income >= ec_10_percent_proficit
 					ec_gold_reserves_percent >= 0.50
 				}
 				AND = {
-					ec_country_weekly_income >= ec_10_percent_of_income
+					ec_country_weekly_income >= ec_5_percent_proficit
 					ec_gold_reserves_percent >= 0.75
 				}
 			}
@@ -2168,7 +2171,10 @@ ec_consider_government_administration = {
 	}
 	OR = {
 		bureaucracy < ec_bureaucracy_1
-		ec_government_costs_value < ec_government_costs_limit
+		AND = {
+			bureaucracy < ec_bureaucracy_ceiling
+			ec_government_costs_value < ec_government_costs_limit
+		}
 	}
 }
 
@@ -2180,7 +2186,6 @@ ec_evaluate_government_administration = {
 		}
 		AND = {
 			$priority$ = 2
-			bureaucracy < ec_bureaucracy_ceiling
 			any_scope_state = {
 				ec_tax_capacity_load_percent < ec_tax_capacity_2
 				ec_allocate_government = {
@@ -2193,7 +2198,6 @@ ec_evaluate_government_administration = {
 		}
 		AND = {
 			$priority$ = 3
-			bureaucracy < ec_bureaucracy_ceiling
 			any_scope_state = {
 				ec_tax_capacity_load_percent < ec_tax_capacity_3
 				ec_allocate_government = {
@@ -2206,7 +2210,6 @@ ec_evaluate_government_administration = {
 		}
 		AND = {
 			$priority$ = 4
-			bureaucracy < ec_bureaucracy_ceiling
 			any_scope_state = {
 				ec_tax_capacity_load_percent < ec_tax_capacity_4
 				ec_allocate_government = {
@@ -2219,7 +2222,6 @@ ec_evaluate_government_administration = {
 		}
 		AND = {
 			$priority$ = 5
-			bureaucracy < ec_bureaucracy_ceiling
 			any_scope_state = {
 				ec_tax_capacity_load_percent < ec_tax_capacity_5
 				ec_allocate_government = {
@@ -2232,7 +2234,6 @@ ec_evaluate_government_administration = {
 		}
 		AND = {
 			$priority$ = 6
-			bureaucracy < ec_bureaucracy_ceiling
 			any_scope_state = {
 				ec_tax_capacity_load_percent < ec_tax_capacity_6
 				ec_allocate_government = {

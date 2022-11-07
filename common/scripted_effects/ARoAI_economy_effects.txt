@@ -220,46 +220,44 @@ ec_collect_budget_costs = {
 		name = ec_military_estimate
 		value = 0
 	}
-	every_scope_state = {
-		every_scope_building = {
-			if = {
-				limit = {
-					OR = {
-						is_building_type = building_government_administration
-						is_building_type = building_port
-						is_building_type = building_university
-					}
-				}
-				root = {
-					change_variable = {
-						name = ec_government_estimate
-						subtract = prev.weekly_profit
-					}
+	every_scope_building = {
+		if = {
+			limit = {
+				OR = {
+					is_building_type = building_government_administration
+					is_building_type = building_port
+					is_building_type = building_university
 				}
 			}
-			if = {
-				limit = {
-					is_building_type = building_construction_sector
-				}
-				root = {
-					change_variable = {
-						name = ec_construction_estimate
-						subtract = prev.weekly_profit
-					}
+			root = {
+				change_variable = {
+					name = ec_government_estimate
+					subtract = prev.weekly_profit
 				}
 			}
-			else_if = {
-				limit = {
-					OR = {
-						is_building_type = building_barracks
-						is_building_type = building_naval_base
-					}
+		}
+		else_if = {
+			limit = {
+				is_building_type = building_construction_sector
+			}
+			root = {
+				change_variable = {
+					name = ec_construction_estimate
+					subtract = prev.weekly_profit
 				}
-				root = {
-					change_variable = {
-						name = ec_military_estimate
-						subtract = prev.weekly_profit
-					}
+			}
+		}
+		else_if = {
+			limit = {
+				OR = {
+					is_building_type = building_barracks
+					is_building_type = building_naval_base
+				}
+			}
+			root = {
+				change_variable = {
+					name = ec_military_estimate
+					subtract = prev.weekly_profit
 				}
 			}
 		}
@@ -328,138 +326,171 @@ ec_change_budget_settings = {
 			is_player = no
 		}
 		
+		# Budget is above neutral
+		
 		if = {
 			limit = {
 				ec_budget_health = {
 					level = 0
 				}
 			}
+			
+			# Raise wages
+			
 			set_government_wage_level = medium
 			set_military_wage_level = medium
-		}
-		
-		if = {
-			limit = {
-				ec_budget_health = {
-					level = 1
-				}
-				NOT = {
-					any_scope_state = {
-						has_active_building = building_conscription_center
-					}
-				}
-			}
+			
+			# Lower taxes
+			
 			if = {
 				limit = {
-					tax_level = very_high
-				}
-				set_tax_level = high
-			}
-			else_if = {
-				limit = {
-					tax_level = high
-				}
-				set_tax_level = medium
-				set_government_wage_level = medium
-				set_military_wage_level = medium
-			}
-			else_if = {
-				limit = {
-					tax_level = medium
-				}
-				set_tax_level = low
-				set_government_wage_level = medium
-				set_military_wage_level = medium
-			}
-			else_if = {
-				limit = {
-					tax_level = low
-				}
-				set_tax_level = very_low
-				set_government_wage_level = medium
-				set_military_wage_level = medium
-			}
-		}
-		
-		if = {
-			limit = {
-				NOT = {
 					ec_budget_health = {
-						level = 0
+						level = 1
+					}
+					NOT = {
+						any_scope_state = {
+							has_active_building = building_conscription_center
+						}
 					}
 				}
-				ec_budget_health = {
-					level = -2
+				if = {
+					limit = {
+						tax_level = very_high
+					}
+					set_tax_level = high
 				}
-			}
-			if = {
-				limit = {
-					ec_can_cut_government_wages = yes
+				else_if = {
+					limit = {
+						tax_level = high
+					}
+					set_tax_level = medium
+					set_government_wage_level = medium
+					set_military_wage_level = medium
 				}
-				set_government_wage_level = low
-			}
-			if = {
-				limit = {
-					ec_can_cut_military_wages = yes
+				else_if = {
+					limit = {
+						tax_level = medium
+					}
+					set_tax_level = low
+					set_government_wage_level = medium
+					set_military_wage_level = medium
 				}
-				set_military_wage_level = low
+				else_if = {
+					limit = {
+						tax_level = low
+					}
+					set_tax_level = very_low
+					set_government_wage_level = medium
+					set_military_wage_level = medium
+				}
 			}
 		}
-		else_if = {
-			limit = {
-				NOT = {
+		
+		# Budget is below neutral
+		
+		else = {
+			
+			# Lower wages
+			
+			if = {
+				limit = {
 					ec_budget_health = {
 						level = -2
 					}
-				}
-			}
-			if = {
-				limit = {
-					ec_can_cut_government_wages = yes
-				}
-				set_government_wage_level = very_low
-			}
-			if = {
-				limit = {
-					ec_can_cut_military_wages = yes
-				}
-				set_military_wage_level = very_low
-			}
-		}
-		
-		if = {
-			limit = {
-				NOT = {
-					ec_budget_health = {
-						level = 0
+					OR = {
+						tax_level = medium
+						tax_level = high
+						tax_level = very_high
 					}
 				}
-				ec_budget_health = {
-					level = -3
+				if = {
+					limit = {
+						ec_can_cut_government_wages = yes
+					}
+					set_government_wage_level = low
 				}
-				OR = {
-					tax_level = very_low
-					tax_level = low
-					tax_level = medium
+				if = {
+					limit = {
+						ec_can_cut_military_wages = yes
+					}
+					set_military_wage_level = low
 				}
 			}
-			set_tax_level = high
-		}
-		else_if = {
-			limit = {
-				NOT = {
+			else_if = {
+				limit = {
+					NOT = {
+						ec_budget_health = {
+							level = -2
+						}
+					}
+					OR = {
+						tax_level = medium
+						tax_level = high
+						tax_level = very_high
+					}
+				}
+				if = {
+					limit = {
+						ec_can_cut_government_wages = yes
+					}
+					set_government_wage_level = very_low
+				}
+				if = {
+					limit = {
+						ec_can_cut_military_wages = yes
+					}
+					set_military_wage_level = very_low
+				}
+			}
+			
+			# Raise taxes
+			
+			if = {
+				limit = {
 					ec_budget_health = {
 						level = -3
 					}
+					OR = {
+						tax_level = very_low
+						tax_level = low
+						tax_level = medium
+					}
 				}
-				OR = {
-					tax_level = very_low
-					tax_level = low
-					tax_level = medium
-					tax_level = high
+				if = {
+					limit = {
+						tax_level = very_low
+					}
+					set_tax_level = low
+				}
+				else_if = {
+					limit = {
+						tax_level = low
+					}
+					set_tax_level = medium
+				}
+				else_if = {
+					limit = {
+						tax_level = medium
+					}
+					set_tax_level = high
 				}
 			}
-			set_tax_level = very_high
+			else_if = {
+				limit = {
+					NOT = {
+						ec_budget_health = {
+							level = -3
+						}
+					}
+					OR = {
+						tax_level = very_low
+						tax_level = low
+						tax_level = medium
+						tax_level = high
+					}
+				}
+				set_tax_level = very_high
+			}
 		}
 	}
 }
@@ -643,7 +674,7 @@ ec_preliminary_calculations = {
 	}
 	change_variable = {
 		name = ec_incorporation_bureaucracy_cost
-		divide = 100000
+		divide = 5000
 	}
 	if = {
 		limit = {
@@ -1011,10 +1042,9 @@ ec_downsize_excess_buildings = {
 				bureaucracy >= ec_bureaucracy_ceiling_excess
 				AND = {
 					bureaucracy >= ec_bureaucracy_excess
-					NOT = {
-						any_scope_state = {
-							ec_tax_capacity_load_percent < 1.10
-						}
+					any_scope_state = {
+						percent <= 0.15
+						ec_tax_capacity_load_percent < 1.10
 					}
 				}
 			}
@@ -1442,15 +1472,30 @@ ec_check_construction_points = {
 					max = 1
 				}
 			}
-			
-			# Subtract construction points that are already used for buildings in the queue
-			
-			subtract = {
-				value = num_queued_constructions
-				multiply = {
-					value = var:ec_construction_points_per_building
-					min = 0.5
-				}
+		}
+	}
+	
+	# Can't beat vanilla AI otherwise
+	
+	if = {
+		limit = {
+			var:ec_free_construction_points < ec_points_for_three_buildings
+		}
+		set_variable = {
+			name = ec_free_construction_points
+			value = ec_points_for_three_buildings
+		}
+	}
+	
+	# Subtract construction points that are already used for buildings in the queue
+	
+	change_variable = {
+		name = ec_free_construction_points
+		subtract = {
+			value = num_queued_constructions
+			multiply = {
+				value = var:ec_construction_points_per_building
+				min = 0.5
 			}
 		}
 	}

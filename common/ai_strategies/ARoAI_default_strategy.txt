@@ -3,7 +3,7 @@
 ai_strategy_default = {
 	icon = "gfx/interface/icons/ai_strategy_icons/placate_population.dds" # Never shown
 
-	desired_tax_level = high
+	desired_tax_level = very_high
 	max_tax_level = very_high
 	min_tax_level = very_low
 	

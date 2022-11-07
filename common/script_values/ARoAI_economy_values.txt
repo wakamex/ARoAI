@@ -373,7 +373,7 @@ ec_requirements_value_11 = {
 
 ### BUREAUCRACY TARGETS
 
-ec_government_costs_share = 0.30
+ec_government_costs_share = 0.35
 
 ec_government_costs_limit = {
 	value = income
@@ -406,9 +406,9 @@ ec_government_costs_limit = {
 	}
 }
 
-ec_government_costs_limit_double = {
+ec_government_costs_limit_and_a_half = {
 	value = ec_government_costs_limit
-	multiply = 2
+	multiply = 1.5
 }
 
 ec_government_costs_excess = {
@@ -487,19 +487,8 @@ ec_bureaucracy_target = {
 	max = 1000000
 }
 
-ec_bureaucracy_current = {
-	value = modifier:country_bureaucracy_add
-	multiply = {
-		value = modifier:country_bureaucracy_mult
-		add = 1
-	}
-	subtract = bureaucracy
-	min = 1
-	max = 1000000
-}
-
 ec_bureaucracy_excess = {
-	value = ec_bureaucracy_current
+	value = produced_bureaucracy
 	multiply = 0.25
 	min = {
 		value = ec_bureaucracy_target
@@ -511,7 +500,7 @@ ec_bureaucracy_excess = {
 }
 
 ec_bureaucracy_ceiling = {
-	value = ec_bureaucracy_current
+	value = produced_bureaucracy
 	multiply = 0.50
 	min = {
 		value = ec_bureaucracy_target
@@ -532,7 +521,7 @@ ec_bureaucracy_ceiling_excess = {
 ec_construction_costs_limit = {
 	value = income
 	multiply = {
-		value = 1.00
+		value = 1.05
 		subtract = {
 			value = ec_government_costs_value
 			add = ec_military_costs_value
@@ -764,10 +753,10 @@ ec_innovation_excess = {
 
 ec_innovation_current = {
 	value = modifier:country_weekly_innovation_add
-	#multiply = {
-	#	value = modifier:country_weekly_innovation_mult
-	#	add = 1
-	#}
+	multiply = {
+		value = modifier:country_weekly_innovation_mult
+		add = 1
+	}
 }
 
 ### UNIVERSITY TARGETS
@@ -973,7 +962,7 @@ ec_convoys_current = {
 
 ### BATTALION TARGETS
 
-ec_military_costs_share = 0.20
+ec_military_costs_share = 0.25
 
 ec_military_costs_limit = {
 	value = income
@@ -1317,4 +1306,17 @@ ec_military_costs_variable = {
 
 ec_available_workforce = {
 	value = var:ec_available_workforce
+}
+
+ec_state_construction_sector_limit = {
+	value = modifier:state_building_construction_sector_max_level_add
+}
+ec_state_port_limit = {
+	value = modifier:state_building_port_max_level_add
+}
+ec_state_barracks_limit = {
+	value = modifier:state_building_barracks_max_level_add
+}
+ec_state_naval_base_limit = {
+	value = modifier:state_building_naval_base_max_level_add
 }

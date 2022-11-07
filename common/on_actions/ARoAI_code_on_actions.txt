@@ -3,6 +3,7 @@
 # Root = Country
 on_monthly_pulse_country = {
 	events = {
+		ARoAI_research_events.1
 		ARoAI_economy_events.1
 	}
 }

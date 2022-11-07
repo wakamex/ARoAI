@@ -3,3 +3,10 @@
 	ec_allow_autobuild = {}
 	ec_disallow_autobuild = {}
 }
+
+rs_mode = {
+	default = rs_default
+	rs_default = {}
+	rs_railroaded = {}
+	rs_disabled = {}
+}

@@ -2312,7 +2312,6 @@ ec_allocate_government_administration = {
 		AND = {
 			$priority$ = 6
 			ec_tax_capacity_load_percent >= ec_tax_capacity_6
-			root.var:cber1 >= 7
 		}
 	}
 }

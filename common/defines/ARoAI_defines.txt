@@ -1,4 +1,8 @@
 ﻿NAI = {
+	TICKS_FOR_FULL_SPENDING_UPDATE = 84 # The higher this is, the less often AIs will update their spending priorities
+	
+	MIN_AVAILABLE_LABOR_FOR_NEW_BUILDING = 100000000		# If state has less than this in available labor, don't bother building anything (multiplied by 1 + number of ongoing constructions)
+	
 	CONSCRIPTION_ESTIMATED_MILITARY_POWER_MULT = 0.75 		# AI multiplies the value of conscriptable battalions by this to estimate potential combat power
 	
 	RAISE_TAX_TO_DESIRED_INCOME_THRESHOLD = 0.03

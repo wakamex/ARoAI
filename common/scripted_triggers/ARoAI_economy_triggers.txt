@@ -4,6 +4,7 @@
 # Requirements of the script as a whole and specifically for collecting population and budget data
 
 ec_country_allowed = {
+	root = c:RUS
 	is_country_alive = yes
 	NOT = { is_country_type = decentralized }
 }
@@ -11,6 +12,7 @@ ec_country_allowed = {
 # Requirements for downsizing government funded buildings which is mostly a budget balancing thing
 
 ec_downsizing_allowed = {
+	root = c:RUS
 	has_variable = ec_country_weekly_surplus
 	has_variable = ec_incorporated_population
 	has_revolution = no
@@ -21,6 +23,7 @@ ec_downsizing_allowed = {
 # Requirements for constructing both special and standard buildings
 
 ec_building_allowed = {
+	root = c:RUS
 	has_variable = ec_country_weekly_surplus
 	has_variable = ec_incorporated_population
 	has_revolution = no

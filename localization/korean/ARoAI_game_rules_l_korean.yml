@@ -1,0 +1,6 @@
+﻿l_korean:
+ rule_ec_autobuild:0 "Autobuild"
+ setting_ec_allow_autobuild:0 "Allowed"
+ setting_ec_allow_autobuild_desc:0 "Players will be able to use a decision that enables automatic construction of buildings in their countries."
+ setting_ec_disallow_autobuild:0 "#high Disallowed#!"
+ setting_ec_disallow_autobuild_desc:0 "Players won't be able to use automatic construction of buildings in their countries."

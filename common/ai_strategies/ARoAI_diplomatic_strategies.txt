@@ -3,9 +3,6 @@
 	
 	type = diplomatic
 	
-	wanted_army_ratio = 250000 # 1 barrack per 200k incorporated population
-	wanted_navy_ratio = 500000 # 1 naval base per 400k coastal incorporated population
-	
 	undesirable_infamy_level = 25
 	unacceptable_infamy_level = 50
 	
@@ -33,6 +30,11 @@
 				scope:target_country = { is_country_type = unrecognized } 
 			}
 			add = 0.5
+			
+			if = {
+				limit = { has_technology_researched = civilizing_mission }
+				add = 1.5
+			}			
 		}
 
 		# Less aggressive against countries we're just antagonistic against, rather than belligerent/domineering
@@ -82,9 +84,6 @@ ai_strategy_territorial_expansion = {
 	icon = "gfx/interface/icons/ai_strategy_icons/territorial_expansion.dds"
 	
 	type = diplomatic
-	
-	wanted_army_ratio = 250000 # 1 barrack per 150k incorporated population
-	wanted_navy_ratio = 500000 # 1 naval base per 400k coastal incorporated population	
 	
 	undesirable_infamy_level = 50
 	unacceptable_infamy_level = 100
@@ -165,9 +164,6 @@ ai_strategy_colonial_expansion = {
 	
 	type = diplomatic
 	
-	wanted_army_ratio = 250000 # 1 barrack per 200k incorporated population
-	wanted_navy_ratio = 500000 # 1 naval base per 200k coastal incorporated population
-	
 	undesirable_infamy_level = 25
 	unacceptable_infamy_level = 50	
 	
@@ -181,7 +177,7 @@ ai_strategy_colonial_expansion = {
 				scope:enemy_country = { is_country_type = unrecognized }
 			}
 			add = 0.25
-		}
+		}	
 	}		
 	
 	diplomatic_play_neutrality = 25 # Added to base neutrality in diplomatic plays
@@ -200,7 +196,12 @@ ai_strategy_colonial_expansion = {
 				NOT = { is_country_type = unrecognized }
 				scope:target_country = { is_country_type = unrecognized } 
 			}
-			add = 2.5
+			add = 2.5			
+			
+			if = {
+				limit = { has_technology_researched = civilizing_mission }
+				add = 2.5
+			}			
 		}
 
 		# Less aggressive against countries we're just antagonistic against, rather than belligerent/domineering
@@ -295,16 +296,6 @@ ai_strategy_colonial_expansion = {
 		value = 10
 		
 		if = {
-			limit = { navy_size < 50 }
-			multiply = 0.5
-		}		
-		
-		if = {
-			limit = { navy_size >= 75 }
-			multiply = 1.5
-		}		
-		
-		if = {
 			limit = { country_rank = rank_value:major_power }
 			add = 5
 		}	
@@ -312,7 +303,22 @@ ai_strategy_colonial_expansion = {
 		if = {
 			limit = { country_rank = rank_value:great_power }
 			add = 5
+		}			
+		
+		if = {
+			limit = { navy_size < 50 }
+			multiply = 0.5
 		}		
+		
+		if = {
+			limit = { navy_size >= 75 }
+			multiply = 1.5
+		}	
+
+		if = {
+			limit = { has_technology_researched = civilizing_mission }
+			multiply = 1.25
+		}				
 	}
 }
 
@@ -320,9 +326,6 @@ ai_strategy_armed_isolationism = {
 	icon = "gfx/interface/icons/ai_strategy_icons/armed_isolationism.dds"
 	
 	type = diplomatic
-	
-	wanted_army_ratio = 250000 # 1 barrack per 150k incorporated population
-	wanted_navy_ratio = 500000 # 1 naval base per 500k coastal incorporated population
 	
 	undesirable_infamy_level = 1
 	unacceptable_infamy_level = 25	
@@ -379,7 +382,12 @@ ai_strategy_armed_isolationism = {
 			limit = { has_law = law_type:law_national_militia }
 			add = 50
 		}
-		
+
+		if = {
+			limit = { has_law = law_type:law_isolationism }
+			add = 100
+		}	
+
 		if = {
 			limit = { country_rank = rank_value:great_power }
 			multiply = 0.1
@@ -388,12 +396,7 @@ ai_strategy_armed_isolationism = {
 		if = {
 			limit = { country_rank = rank_value:major_power }
 			multiply = 0.5
-		}	
-
-		if = {
-			limit = { has_law = law_type:law_isolationism }
-			add = 100
-		}		
+		}			
 	}
 }
 
@@ -401,9 +404,6 @@ ai_strategy_economic_imperialism = {
 	icon = "gfx/interface/icons/ai_strategy_icons/economic_imperialism.dds"
 	
 	type = diplomatic
-	
-	wanted_army_ratio = 250000 # 1 barrack per 200k incorporated population
-	wanted_navy_ratio = 500000 # 1 naval base per 200k coastal incorporated population
 	
 	undesirable_infamy_level = 25
 	unacceptable_infamy_level = 50	
@@ -438,6 +438,11 @@ ai_strategy_economic_imperialism = {
 				scope:target_country = { is_country_type = unrecognized } 
 			}
 			add = 1.5
+			
+			if = {
+				limit = { has_technology_researched = civilizing_mission }
+				add = 2.5
+			}			
 		}
 		
 		if = {
@@ -610,9 +615,6 @@ ai_strategy_unify_germany = {
 	icon = "gfx/interface/icons/ai_strategy_icons/unification.dds"
 	
 	type = diplomatic
-	
-	wanted_army_ratio = 250000 # 1 barrack per 150k incorporated population
-	wanted_navy_ratio = 500000 # 1 naval base per 400k coastal incorporated population
 	
 	undesirable_infamy_level = 50
 	unacceptable_infamy_level = 100
@@ -792,9 +794,6 @@ ai_strategy_unify_italy = {
 	icon = "gfx/interface/icons/ai_strategy_icons/unification.dds"
 	
 	type = diplomatic
-	
-	wanted_army_ratio = 250000 # 1 barrack per 150k incorporated population
-	wanted_navy_ratio = 500000 # 1 naval base per 400k coastal incorporated population
 		
 	undesirable_infamy_level = 50
 	unacceptable_infamy_level = 100
@@ -975,9 +974,6 @@ ai_strategy_unify_ethiopia = {
 	
 	type = diplomatic
 	
-	wanted_army_ratio = 250000 # 1 barrack per 150k incorporated population
-	wanted_navy_ratio = 500000 # 1 naval base per 400k coastal incorporated population
-	
 	undesirable_infamy_level = 50
 	unacceptable_infamy_level = 100
 	
@@ -1114,7 +1110,7 @@ ai_strategy_unify_ethiopia = {
 	}
 
 	weight = {
-		value = 50
+		value = 500
 		
 		if = {
 			limit = { NOT = { is_country_type = unrecognized } }
@@ -1137,9 +1133,6 @@ ai_strategy_unify_china = {
 	icon = "gfx/interface/icons/ai_strategy_icons/unification.dds"
 	
 	type = diplomatic
-	
-	wanted_army_ratio = 250000 # 1 barrack per 150k incorporated population
-	wanted_navy_ratio = 500000 # 1 naval base per 400k coastal incorporated population
 	
 	undesirable_infamy_level = 50
 	unacceptable_infamy_level = 100

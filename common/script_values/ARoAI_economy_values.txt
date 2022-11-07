@@ -65,7 +65,11 @@ ec_occupied_levels = {
 
 ec_occupied_levels_with_margin = {
 	value = ec_occupied_levels
-	subtract = 0.25
+	subtract = {
+		value = level
+		multiply = define:NEconomy|HIRING_RATE
+		multiply = 0.75
+	}
 }
 
 ec_gdp_per_capita = {
@@ -556,6 +560,23 @@ ec_construction_costs_target = {
 				min = 1
 			}
 		}
+		if = {
+			limit = {
+				is_player = no
+			}
+			if = {
+				limit = {
+					tax_level = very_low
+				}
+				multiply = 1.20
+			}
+			else_if = {
+				limit = {
+					tax_level = low
+				}
+				multiply = 1.10
+			}
+		}
 		min = 0.20
 		max = 0.70
 		if = {
@@ -685,7 +706,16 @@ ec_construction_points_target = {
 		add = {
 			value = var:ec_square_root_of_minus_half_unincorporated_gdp_per_capita
 			subtract = 1.50
-			divide = 2.00
+			multiply = 3 # 1.33(3)
+			divide = 4
+			min = 0
+			max = 0.75
+		}
+		add = {
+			value = var:ec_square_root_of_minus_half_unincorporated_gdp_per_capita
+			subtract = 2.50
+			multiply = 3 # 1.66(6)
+			divide = 5
 			min = 0
 			max = 0.75
 		}
@@ -868,58 +898,23 @@ ec_university_excess = {
 ### INFRASTRUCTURE TARGETS
 
 ec_infrastructure_1 = {
-	value = infrastructure_usage
-	multiply = 0.60
-	min = 1
-	max = 1000000
+	value = 0.60
 }
 
 ec_infrastructure_2 = {
-	value = infrastructure_usage
-	multiply = 0.70
-	min = 1
-	max = 1000000
+	value = 0.70
 }
 
 ec_infrastructure_3 = {
-	value = infrastructure_usage
-	multiply = 0.80
-	min = 1
-	max = 1000000
+	value = 0.80
 }
 
 ec_infrastructure_4 = {
-	value = infrastructure_usage
-	multiply = 0.90
-	min = 1
-	max = 1000000
+	value = 0.90
 }
 
 ec_infrastructure_5 = {
-	value = infrastructure_usage
-	min = 1
-	max = 1000000
-}
-
-ec_infrastructure_6 = {
-	value = infrastructure_usage
-	add = 10
-	min = 10
-	max = 1000000
-}
-
-ec_infrastructure_7 = {
-	value = infrastructure_usage
-	add = 20
-	min = 20
-	max = 1000000
-}
-
-ec_infrastructure_excess = {
-	value = infrastructure_usage
-	add = 50
-	min = 50
-	max = 1000000
+	value = 1.00
 }
 
 ### CONVOY TARGETS
@@ -977,14 +972,21 @@ ec_convoys_target = {
 	}
 	multiply = {
 		value = var:ec_square_root_of_minus_half_unincorporated_gdp_per_capita
-		min = 0.50
-		max = 2.00
+		min = 0.75
+		max = 1.50
 		add = {
 			value = var:ec_square_root_of_minus_half_unincorporated_gdp_per_capita
-			subtract = 2.00
+			subtract = 1.50
 			divide = 2.00
 			min = 0
-			max = 1.00
+			max = 0.75
+		}
+		add = {
+			value = var:ec_square_root_of_minus_half_unincorporated_gdp_per_capita
+			subtract = 3.00
+			divide = 3.00
+			min = 0
+			max = 0.75
 		}
 	}
 }
@@ -1289,6 +1291,13 @@ ec_battalions_target = {
 			min = 0
 			max = 0.75
 		}
+		add = {
+			value = var:ec_square_root_of_incorporated_gdp_per_capita
+			subtract = 3.00
+			divide = 3.00
+			min = 0
+			max = 0.75
+		}
 	}
 }
 
@@ -1514,10 +1523,10 @@ ec_flotillas_target = {
 	add = {
 		value = var:ec_incorporated_population
 		subtract = var:ec_coastal_incorporated_population
-		multiply = 0.25
+		multiply = 0.75
 	}
 	divide = 1000000
-	multiply = 2.50
+	multiply = 2.25
 	multiply = {
 		value = var:ec_square_root_of_incorporated_gdp_per_capita
 		min = 0.75
@@ -1526,6 +1535,13 @@ ec_flotillas_target = {
 			value = var:ec_square_root_of_incorporated_gdp_per_capita
 			subtract = 1.50
 			divide = 2.00
+			min = 0
+			max = 0.75
+		}
+		add = {
+			value = var:ec_square_root_of_incorporated_gdp_per_capita
+			subtract = 3.00
+			divide = 3.00
 			min = 0
 			max = 0.75
 		}

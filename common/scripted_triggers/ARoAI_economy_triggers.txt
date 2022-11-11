@@ -2640,6 +2640,11 @@ ec_consider_university = {
 		has_modifier = ec_university_cooldown
 	}
 	has_technology_researched = academia
+	ec_consider_building = {
+		building = building_university
+		shortage = 1
+		profitability = 0
+	}
 	OR = {
 		ec_budget_health = {
 			level = 0
@@ -2649,27 +2654,15 @@ ec_consider_university = {
 			tax_level = low
 		}
 	}
-	ec_consider_building = {
-		building = building_university
-		shortage = 1
-		profitability = 0
-	}
 	OR = {
+		AND = {
+			ec_university_count < ec_university_11
+			ec_government_costs_value < ec_government_costs_excess
+			ec_government_costs_expected < ec_government_costs_ceiling
+		}
 		AND = {
 			ec_government_costs_value < ec_government_costs_target
 			ec_government_costs_expected < ec_government_costs_excess
-		}
-		AND = {
-			ec_government_costs_value < ec_government_costs_excess
-			ec_government_costs_expected < ec_government_costs_ceiling
-			OR = {
-				ec_budget_health = {
-					level = 1
-				}
-				tax_level = very_low
-				tax_level = low
-				tax_level = medium
-			}
 		}
 	}
 	OR = {

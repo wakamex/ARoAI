@@ -861,28 +861,30 @@ ec_construction_points_11 = {
 ec_construction_points_target = {
 	value = total_population
 	divide = 1000000
+	multiply = 5.00
 	multiply = {
-		value = var:ec_square_root_of_gdp_per_capita
-		min = 0.75
-		max = 1.50
+		value = 1
+		add = {
+			value = var:ec_square_root_of_gdp_per_capita
+			subtract = 1.00
+			min = -0.25
+			max = 0.50
+		}
 		add = {
 			value = var:ec_square_root_of_gdp_per_capita
 			subtract = 1.50
-			multiply = 3
-			divide = 4
+			multiply = 0.75
 			min = 0
 			max = 0.75
 		}
 		add = {
 			value = var:ec_square_root_of_gdp_per_capita
 			subtract = 2.50
-			multiply = 3
-			divide = 5
+			multiply = 0.50
 			min = 0
 			max = 0.75
 		}
 	}
-	multiply = 5.00
 	if = {
 		limit = {
 			is_player = no
@@ -968,52 +970,52 @@ ec_construction_points_ceiling = {
 
 ec_innovation_1 = {
 	value = ec_innovation_target
-	divide = 2.50
+	divide = 2.750
 }
 
 ec_innovation_2 = {
 	value = ec_innovation_target
-	divide = 2.35
+	divide = 2.575
 }
 
 ec_innovation_3 = {
 	value = ec_innovation_target
-	divide = 2.20
+	divide = 2.400
 }
 
 ec_innovation_4 = {
 	value = ec_innovation_target
-	divide = 2.05
+	divide = 2.225
 }
 
 ec_innovation_5 = {
 	value = ec_innovation_target
-	divide = 1.90
+	divide = 2.050
 }
 
 ec_innovation_6 = {
 	value = ec_innovation_target
-	divide = 1.75
+	divide = 1.875
 }
 
 ec_innovation_7 = {
 	value = ec_innovation_target
-	divide = 1.60
+	divide = 1.700
 }
 
 ec_innovation_8 = {
 	value = ec_innovation_target
-	divide = 1.45
+	divide = 1.525
 }
 
 ec_innovation_9 = {
 	value = ec_innovation_target
-	divide = 1.30
+	divide = 1.350
 }
 
 ec_innovation_10 = {
 	value = ec_innovation_target
-	divide = 1.15
+	divide = 1.175
 }
 
 ec_innovation_11 = {
@@ -1098,52 +1100,52 @@ ec_innovation_current = {
 
 ec_university_1 = {
 	value = ec_university_target
-	divide = 2.50
+	divide = 3.50
 }
 
 ec_university_2 = {
 	value = ec_university_target
-	divide = 2.35
+	divide = 3.25
 }
 
 ec_university_3 = {
 	value = ec_university_target
-	divide = 2.20
+	divide = 3.00
 }
 
 ec_university_4 = {
 	value = ec_university_target
-	divide = 2.05
+	divide = 2.75
 }
 
 ec_university_5 = {
 	value = ec_university_target
-	divide = 1.90
+	divide = 2.50
 }
 
 ec_university_6 = {
 	value = ec_university_target
-	divide = 1.75
+	divide = 2.25
 }
 
 ec_university_7 = {
 	value = ec_university_target
-	divide = 1.60
+	divide = 2.00
 }
 
 ec_university_8 = {
 	value = ec_university_target
-	divide = 1.45
+	divide = 1.75
 }
 
 ec_university_9 = {
 	value = ec_university_target
-	divide = 1.30
+	divide = 1.50
 }
 
 ec_university_10 = {
 	value = ec_university_target
-	divide = 1.15
+	divide = 1.25
 }
 
 ec_university_11 = {
@@ -1152,13 +1154,32 @@ ec_university_11 = {
 
 ec_university_target = {
 	value = var:ec_incorporated_population
-	divide = 600000
-	multiply = {
-		value = ec_incorporated_gdp_per_capita
-		min = 0.5
-		max = 2.0
-	}
+	divide = 500000
 	subtract = 1
+	multiply = {
+		value = 1
+		add = {
+			value = var:ec_square_root_of_incorporated_gdp_per_capita
+			subtract = 1.00
+			divide = 1.50
+			min = -0.25
+			max = 0.50
+		}
+		add = {
+			value = var:ec_square_root_of_incorporated_gdp_per_capita
+			subtract = 1.75
+			divide = 2.00
+			min = 0
+			max = 0.75
+		}
+		add = {
+			value = var:ec_square_root_of_incorporated_gdp_per_capita
+			subtract = 3.25
+			divide = 2.50
+			min = 0
+			max = 0.75
+		}
+	}
 }
 
 ec_university_excess = {
@@ -1261,19 +1282,31 @@ ec_convoys_target = {
 		multiply = 0.10
 	}
 	multiply = {
-		value = var:ec_square_root_of_minus_half_unincorporated_gdp_per_capita
-		min = 0.75
-		max = 1.50
+		value = 1
 		add = {
 			value = var:ec_square_root_of_minus_half_unincorporated_gdp_per_capita
-			subtract = 1.50
+			subtract = 1.00
+			divide = 1.25
+			min = -0.25
+			max = 0.50
+		}
+		add = {
+			value = var:ec_square_root_of_minus_half_unincorporated_gdp_per_capita
+			subtract = 1.625
 			divide = 1.50
 			min = 0
 			max = 0.75
 		}
 		add = {
 			value = var:ec_square_root_of_minus_half_unincorporated_gdp_per_capita
-			subtract = 2.625
+			subtract = 2.75
+			divide = 1.75
+			min = 0
+			max = 0.75
+		}
+		add = {
+			value = var:ec_square_root_of_minus_half_unincorporated_gdp_per_capita
+			subtract = 4.0625
 			divide = 2.00
 			min = 0
 			max = 0.75
@@ -1599,22 +1632,27 @@ ec_battalions_11 = {
 ec_battalions_target = {
 	value = var:ec_incorporated_population
 	divide = 1000000
-	multiply = 7.50
+	multiply = 8.00
 	multiply = {
-		value = var:ec_square_root_of_incorporated_gdp_per_capita
-		min = 0.75
-		max = 1.50
+		value = 1
 		add = {
 			value = var:ec_square_root_of_incorporated_gdp_per_capita
-			subtract = 1.50
+			subtract = 1.00
+			divide = 1.50
+			min = -0.25
+			max = 0.50
+		}
+		add = {
+			value = var:ec_square_root_of_incorporated_gdp_per_capita
+			subtract = 1.75
 			divide = 2.00
 			min = 0
 			max = 0.75
 		}
 		add = {
 			value = var:ec_square_root_of_incorporated_gdp_per_capita
-			subtract = 3.00
-			divide = 3.00
+			subtract = 3.25
+			divide = 2.50
 			min = 0
 			max = 0.75
 		}
@@ -1854,20 +1892,25 @@ ec_flotillas_target = {
 	divide = 1000000
 	multiply = 3.00
 	multiply = {
-		value = var:ec_square_root_of_incorporated_gdp_per_capita
-		min = 0.75
-		max = 1.50
+		value = 1
 		add = {
 			value = var:ec_square_root_of_incorporated_gdp_per_capita
-			subtract = 1.50
+			subtract = 1.00
+			divide = 1.50
+			min = -0.25
+			max = 0.50
+		}
+		add = {
+			value = var:ec_square_root_of_incorporated_gdp_per_capita
+			subtract = 1.75
 			divide = 2.00
 			min = 0
 			max = 0.75
 		}
 		add = {
 			value = var:ec_square_root_of_incorporated_gdp_per_capita
-			subtract = 3.00
-			divide = 3.00
+			subtract = 3.25
+			divide = 2.50
 			min = 0
 			max = 0.75
 		}

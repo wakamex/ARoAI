@@ -1845,7 +1845,6 @@ ec_downsize_excess_buildings = {
 					OR = {
 						modifier:country_weekly_innovation_add >= ec_innovation_ceiling
 						ec_university_count >= ec_university_ceiling
-						var:ec_government_costs >= ec_government_costs_ceiling
 					}
 				}
 				AND = {
@@ -1857,7 +1856,7 @@ ec_downsize_excess_buildings = {
 					OR = {
 						modifier:country_weekly_innovation_add >= ec_innovation_excess
 						ec_university_count >= ec_university_excess
-						var:ec_government_costs >= ec_government_costs_excess
+						var:ec_government_costs >= ec_government_costs_ceiling
 					}
 				}
 				AND = {
@@ -1869,8 +1868,16 @@ ec_downsize_excess_buildings = {
 					OR = {
 						modifier:country_weekly_innovation_add >= ec_innovation_target
 						ec_university_count >= ec_university_target
-						var:ec_government_costs >= ec_government_costs_target
+						var:ec_government_costs >= ec_government_costs_excess
 					}
+				}
+				AND = {
+					NOT = {
+						ec_budget_health = {
+							level = -2
+						}
+					}
+					var:ec_government_costs >= ec_government_costs_target
 				}
 				AND = {
 					NOT = {
@@ -1901,10 +1908,7 @@ ec_downsize_excess_buildings = {
 							level = 1
 						}
 					}
-					OR = {
-						ec_convoys_current >= ec_convoys_ceiling
-						var:ec_government_costs >= ec_government_costs_ceiling
-					}
+					ec_convoys_current >= ec_convoys_ceiling
 				}
 				AND = {
 					NOT = {
@@ -1914,7 +1918,7 @@ ec_downsize_excess_buildings = {
 					}
 					OR = {
 						ec_convoys_current >= ec_convoys_excess
-						var:ec_government_costs >= ec_government_costs_excess
+						var:ec_government_costs >= ec_government_costs_ceiling
 					}
 				}
 				AND = {
@@ -1925,8 +1929,16 @@ ec_downsize_excess_buildings = {
 					}
 					OR = {
 						ec_convoys_current >= ec_convoys_target
-						var:ec_government_costs >= ec_government_costs_target
+						var:ec_government_costs >= ec_government_costs_excess
 					}
+				}
+				AND = {
+					NOT = {
+						ec_budget_health = {
+							level = -2
+						}
+					}
+					var:ec_government_costs >= ec_government_costs_target
 				}
 				AND = {
 					NOT = {
@@ -2170,7 +2182,9 @@ ec_construct_special_buildings = {
 			NOT = {
 				s:STATE_SINAI = {
 					any_scope_state = {
-						has_building = building_suez_canal
+						any_scope_building = {
+							is_building_type = building_suez_canal
+						}
 					}
 				}
 			}
@@ -2195,7 +2209,9 @@ ec_construct_special_buildings = {
 			NOT = {
 				s:STATE_PANAMA = {
 					any_scope_state = {
-						has_building = building_panama_canal
+						any_scope_building = {
+							is_building_type = building_panama_canal
+						}
 					}
 				}
 			}
@@ -2220,7 +2236,9 @@ ec_construct_special_buildings = {
 				}
 				NOT = {
 					any_scope_state = {
-						has_building = building_big_ben
+						any_scope_building = {
+							is_building_type = building_big_ben
+						}
 					}
 				}
 			}
@@ -2246,7 +2264,9 @@ ec_construct_special_buildings = {
 				}
 				NOT = {
 					any_scope_state = {
-						has_building = building_eiffel_tower
+						any_scope_building = {
+							is_building_type = building_eiffel_tower
+						}
 					}
 				}
 			}
@@ -2272,7 +2292,9 @@ ec_construct_special_buildings = {
 				}
 				NOT = {
 					any_scope_state = {
-						has_building = building_statue_of_liberty
+						any_scope_building = {
+							is_building_type = building_statue_of_liberty
+						}
 					}
 				}
 			}
